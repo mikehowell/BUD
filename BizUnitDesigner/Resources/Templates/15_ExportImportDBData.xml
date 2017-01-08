@@ -1,0 +1,75 @@
+﻿<TestCase testName="Test_15_ExportImportDBData">
+
+	<TestSetup>
+	
+	<!-- Clears the customer demographics table. -->
+	<TestStep assemblyPath="" typeName="BizUnit.DatabaseDeleteStep">
+    	<ConnectionString>Server=localhost;Database=NorthWind;Trusted_Connection=True;</ConnectionString>
+    	<Table>CustomerDemographics</Table>
+    	<Condition></Condition>
+    </TestStep>
+	
+	<!-- CustomerDemographics in NorthWinds is empty by default. Add some dummy data for the purpose of this test-->
+		<TestStep assemblyPath="" typeName="BizUnit.DBExecuteNonQueryStep">
+			<DelayBeforeExecution>1</DelayBeforeExecution>
+			<ConnectionString>Persist Security Info=False;Integrated Security=SSPI;database=NorthWind;server=(local);Connect Timeout=30</ConnectionString>
+			<NumberOfRowsAffected>1</NumberOfRowsAffected> <!--If the number of rows affected by the SQL statement is not 1, the test step will fail -->
+			<SQLQuery>
+				<RawSQLQuery>INSERT INTO CustomerDemographics (CustomerTypeID) VALUES('123')</RawSQLQuery>
+				<SQLQueryParams>
+				</SQLQueryParams>
+			</SQLQuery>
+		</TestStep>		
+
+		<TestStep assemblyPath="" typeName="BizUnit.DBExecuteNonQueryStep">
+			<DelayBeforeExecution>1</DelayBeforeExecution>
+			<ConnectionString>Persist Security Info=False;Integrated Security=SSPI;database=NorthWind;server=(local);Connect Timeout=30</ConnectionString>
+			<NumberOfRowsAffected>1</NumberOfRowsAffected> <!--If the number of rows affected by the SQL statement is not 1, the test step will fail -->
+			<SQLQuery>
+				<RawSQLQuery>INSERT INTO CustomerDemographics (CustomerTypeID) VALUES('456')</RawSQLQuery>
+				<SQLQueryParams>
+				</SQLQueryParams>
+			</SQLQuery>
+		</TestStep>		
+
+	</TestSetup>
+	
+	<TestExecution>
+		<!-- Export all data in CustomerDemographics to an xml file -->
+	 <TestStep assemblyPath="" typeName="BizUnit.ExportDBDataToDataSetStep">
+			<DelayBeforeExecution>1</DelayBeforeExecution> 
+			<ConnectionString>Persist Security Info=False;Integrated Security=true;database=NorthWind;server=.;Connect Timeout=30</ConnectionString>
+			<DatasetWriteXmlSchemaPath>C:\CustomerDemographicsSchema.xml</DatasetWriteXmlSchemaPath>
+			<DatasetWriteXmlPath>C:\CustomerDemographics.xml</DatasetWriteXmlPath>
+			<TableNames>CustomerDemographics</TableNames>
+	 </TestStep>
+
+		<!-- Delete the Rows from the CustomerDemographics table so that they can be verified for a successful import -->
+		<TestStep assemblyPath="" typeName="BizUnit.DBExecuteNonQueryStep">
+			<DelayBeforeExecution>1</DelayBeforeExecution>
+			<ConnectionString>Persist Security Info=False;Integrated Security=SSPI;database=NorthWind;server=(local);Connect Timeout=30</ConnectionString>
+			<NumberOfRowsAffected>2</NumberOfRowsAffected> <!--If the number of rows affected by the SQL statement is not 1, the test step will fail -->
+			<SQLQuery>
+				<RawSQLQuery>DELETE from CustomerDemographics</RawSQLQuery>
+				<SQLQueryParams>
+				</SQLQueryParams>
+			</SQLQuery>
+		</TestStep>		
+		
+		<!-- Import data from xml file to CustomerDemographics-->
+	 <TestStep assemblyPath="" typeName="BizUnit.ImportDatasetToDBStep">
+			<DelayBeforeExecution>1</DelayBeforeExecution> 
+			<ConnectionString>Persist Security Info=False;Integrated Security=SSPI;database=NorthWind;server=(local);Connect Timeout=30</ConnectionString>
+			<DatasetReadXmlSchemaPath>C:\CustomerDemographicsSchema.xml</DatasetReadXmlSchemaPath>
+			<DatasetReadXmlPath>C:\CustomerDemographics.xml</DatasetReadXmlPath> 
+	 </TestStep>		
+	 
+	 
+	</TestExecution>
+
+	<!-- Test cleanup: test cases should always leave the system in the state they found it -->
+	<TestCleanup>
+	</TestCleanup>	
+	
+</TestCase>
+

@@ -1,0 +1,49 @@
+<TestCase testName="Test_16_EventLogTest">
+	<TestSetup>
+
+		<TestStep assemblyPath="" typeName="BizUnit.HostConductorStep" failOnError="false">
+			<Action>start</Action>
+			<HostInstanceName>BizTalkServerApplication</HostInstanceName>
+		</TestStep>
+
+		<TestStep assemblyPath="" typeName="BizUnit.EventLogClearStep">
+			<Machine></Machine>
+			<EventLog>Application</EventLog>
+		</TestStep>
+
+	</TestSetup>
+
+	<TestExecution>
+
+		<TestStep assemblyPath="" typeName="BizUnit.HostConductorStep">
+			<Action>stop</Action>
+			<HostInstanceName>BizTalkServerApplication</HostInstanceName>
+		</TestStep>
+
+		<TestStep assemblyPath="" typeName="BizUnit.HostConductorStep">
+			<Action>start</Action>
+			<HostInstanceName>BizTalkServerApplication</HostInstanceName>
+		</TestStep>
+
+		<TestStep assemblyPath="" typeName="BizUnit.DelayStep">
+			<Delay>3000</Delay>
+		</TestStep>
+
+		<TestStep assemblyPath="" typeName="BizUnit.EventLogCheckStep">
+			<DelayBeforeCheck>0</DelayBeforeCheck>
+			<!-- Optional, seconds to delay performing check -->
+			<Machine></Machine>
+			<EventLog>Application</EventLog>
+			<Source>BizTalk Server 2006</Source>
+			<Type>Information</Type>
+			<ValidationRegex>The following BizTalk host instance has initialized successfully</ValidationRegex>
+			<FailIfFound>False</FailIfFound>
+		</TestStep>
+
+	</TestExecution>
+
+	<!-- Test cleanup: test cases should always leave the system in the state they found it -->
+	<TestCleanup>
+
+	</TestCleanup>
+</TestCase>

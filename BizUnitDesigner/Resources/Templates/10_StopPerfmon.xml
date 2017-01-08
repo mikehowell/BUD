@@ -1,0 +1,31 @@
+﻿<TestCase testName="Test_10_StopPerfmon">
+
+  <TestSetup>
+
+  </TestSetup>
+
+  <TestExecution>
+
+    <!-- Stop Perfmon counters -->
+    <TestStep assemblyPath="" typeName="BizUnit.ExecuteCommandStep" failOnError="false">
+      <ProcessName>logman</ProcessName>
+      <ProcessParams>stop BTSPerfTest01</ProcessParams>
+      <WorkingDirectory>c:\</WorkingDirectory>
+    </TestStep>
+
+    <!-- Delete Perfmon counters if they exist...-->
+    <TestStep assemblyPath="" typeName="BizUnit.ExecuteCommandStep" failOnError="false">
+      <ProcessName>logman</ProcessName>
+      <ProcessParams>delete BTSPerfTest01</ProcessParams>
+      <WorkingDirectory>c:\</WorkingDirectory>
+    </TestStep>
+
+  </TestExecution>
+
+  <!-- Test cleanup: test cases should always leave the system in the state they found it -->
+  <TestCleanup>
+
+  </TestCleanup>
+
+</TestCase>
+

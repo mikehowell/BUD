@@ -1,0 +1,37 @@
+﻿<TestCase testName="Test_14_DBExecuteNonQuery">
+
+	<TestSetup>
+	</TestSetup>
+
+	<TestExecution> 
+
+		<!-- The below test step performs a simple update. It updates the CategoryName with the same value i.e. Seafood. -->
+		<TestStep assemblyPath="" typeName="BizUnit.DBExecuteNonQueryStep">
+			<DelayBeforeExecution>1</DelayBeforeExecution>
+			<ConnectionString>Persist Security Info=False;Integrated Security=SSPI;database=NorthWind;server=(local);Connect Timeout=30</ConnectionString>
+			<NumberOfRowsAffected>1</NumberOfRowsAffected> <!--If the number of rows affected by the SQL statement is not 1, the test step will fail -->
+			<SQLQuery>
+				<RawSQLQuery>UPDATE Categories SET CategoryName='Seafood' WHERE CategoryID=8</RawSQLQuery>
+				<SQLQueryParams>
+				</SQLQueryParams>
+			</SQLQuery>
+		</TestStep>		
+
+		<TestStep assemblyPath="" typeName="BizUnit.DBExecuteNonQueryStep">
+			<DelayBeforeExecution>1</DelayBeforeExecution>
+			<ConnectionString>Persist Security Info=False;Integrated Security=SSPI;database=NorthWind;server=(local);Connect Timeout=30</ConnectionString>
+			<NumberOfRowsAffected>0</NumberOfRowsAffected><!--If the number of rows affected by the SQL statement is not 0, the test step will fail -->
+			<SQLQuery>
+				<RawSQLQuery>DELETE FROM [Order Details] WHERE OrderId={0}</RawSQLQuery>
+				<SQLQueryParams>
+					<SQLQueryParam >020020</SQLQueryParam> 
+				</SQLQueryParams>
+			</SQLQuery>
+		</TestStep>		
+		
+	</TestExecution> 
+	
+	<TestCleanup>
+  </TestCleanup>	
+	
+</TestCase>

@@ -1,0 +1,24 @@
+<TestCase testName="Test_12_HostConductor">
+	<TestSetup>
+    
+  </TestSetup>
+  
+	<TestExecution>
+		
+		<TestStep assemblyPath="" typeName="BizUnit.HostConductorStep">
+			<Action>stop</Action>
+			<HostInstanceName>BizTalkServerApplication</HostInstanceName>
+		</TestStep>
+		
+		<TestStep assemblyPath="" typeName="BizUnit.HostConductorStep">
+			<Action>start</Action>
+			<HostInstanceName>BizTalkServerApplication</HostInstanceName>
+		</TestStep>
+		
+	</TestExecution>
+  
+	<!-- Test cleanup: test cases should always leave the system in the state they found it -->
+	<TestCleanup>
+    
+  </TestCleanup>
+</TestCase>

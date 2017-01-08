@@ -1,0 +1,58 @@
+<TestCase testName="Test_07_MSMQSteps">
+
+	<TestSetup>
+	
+		<TestStep assemblyPath="" typeName="BizUnit.MSMQCreateQueueStep">
+			<QueuePath transactional="true">.\Private$\Test01</QueuePath>
+			<QueuePath transactional="true">.\Private$\Test02</QueuePath>
+		</TestStep>
+		
+	</TestSetup>
+	
+	<TestExecution>
+		<TestStep assemblyPath="" typeName="BizUnit.MSMQWriteStep">
+			<SourcePath>..\..\..\TestData\InDoc1.xml</SourcePath>
+			<QueuePath>.\Private$\Test01</QueuePath>
+			<MessageLabel>Test_07_MSMQWrite_MSMQRead_MSMQPurge</MessageLabel>
+		</TestStep>
+
+		<TestStep assemblyPath="" typeName="BizUnit.MSMQReadStep">
+			<QueuePath>.\Private$\Test01</QueuePath>
+			<Timeout>2000</Timeout>
+
+			<ValidationStep assemblyPath="" typeName="BizUnit.XmlValidationStep">
+				<XmlSchemaPath>..\..\..\TestData\PurchaseOrder.xsd</XmlSchemaPath>
+				<XmlSchemaNameSpace>http://SendMail.PurchaseOrder</XmlSchemaNameSpace>
+				<XPathList>
+					<XPathValidation query="/*[local-name()='PurchaseOrder' and namespace-uri()='http://SendMail.PurchaseOrder']/*[local-name()='PONumber' and namespace-uri()='']">PONumber_0</XPathValidation>
+				</XPathList>
+			</ValidationStep>
+			
+		</TestStep>
+
+		<TestStep assemblyPath="" typeName="BizUnit.MSMQWriteStep">
+			<SourcePath>..\..\..\TestData\InDoc1.xml</SourcePath>
+			<QueuePath>.\Private$\Test02</QueuePath>
+			<MessageLabel>Test_07_MSMQWrite_MSMQRead_MSMQPurge</MessageLabel>
+		</TestStep>
+
+		<TestStep assemblyPath="" typeName="BizUnit.MSMQReadStep">
+			<QueuePath>.\Private$\Test02</QueuePath>
+			<MatchFilePath>..\..\..\TestData\ResultDoc1.xml</MatchFilePath>
+			<Timeout>2000</Timeout>
+		</TestStep>
+
+	</TestExecution>
+
+	<!-- Test cleanup: test cases should always leave the system in the state they found it -->
+	<TestCleanup>
+
+		<TestStep assemblyPath="" typeName="BizUnit.MSMQDeleteQueueStep">
+			<QueuePath>.\Private$\Test01</QueuePath>
+			<QueuePath>.\Private$\Test02</QueuePath>
+		</TestStep>
+
+	</TestCleanup>	
+	
+</TestCase>
+

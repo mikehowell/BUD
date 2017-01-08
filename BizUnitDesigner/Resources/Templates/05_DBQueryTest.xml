@@ -1,0 +1,47 @@
+<TestCase testName="Test_05_DBQueryTest">
+
+	<TestSetup>
+	</TestSetup>
+	
+	<TestExecution>
+	
+		<TestStep assemblyPath="" typeName="BizUnit.DBQueryStep" NonGUITestStep="true">
+			<DelayBeforeCheck>0</DelayBeforeCheck>
+			<ConnectionString>Persist Security Info=False;Integrated Security=SSPI;database=AdventureWorks;server=(local);Connect Timeout=30</ConnectionString>
+		
+			<!-- 
+			The SQL Query to execute is built by formatting the RawSQLQuery substituting in the 
+			SQLQueryParam's
+			-->
+			<SQLQuery>
+				<RawSQLQuery>select * from Person.Contact where EmailAddress = '{0}'</RawSQLQuery>
+				<SQLQueryParams>
+<!--					<SQLQueryParam takeFromCtx="EventId">Northwoods Cranberry Sauce</SQLQueryParam> -->
+					<SQLQueryParam>frances0@adventure-works.com</SQLQueryParam>
+				</SQLQueryParams>
+			</SQLQuery>
+				
+			<Rows>
+				<Columns>
+				<!-- 
+				Note: The column names are dependant on the DB schema being checked against.
+				Adding the attribute isUnique="true" to one of the columns allows it to be 
+				uniquely selcted in the scenario where multiple rows are returned.
+				-->
+						
+					<ContactID>6</ContactID>
+					<Title>Ms.</Title>
+					<FirstName>Frances</FirstName>
+					<LastName>Adams</LastName>
+				</Columns>
+			</Rows>	
+		</TestStep>	
+		
+	</TestExecution>
+
+	<!-- Test cleanup: test cases should always leave the system in the state they found it -->
+	<TestCleanup>
+	</TestCleanup>	
+	
+</TestCase>
+

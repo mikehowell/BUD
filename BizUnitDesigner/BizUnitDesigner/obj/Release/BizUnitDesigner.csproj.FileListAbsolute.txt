@@ -1,0 +1,11 @@
+E:\Source\BUD\BizUnitDesigner\BizUnitDesigner\bin\Release\BizUnitDesigner.exe.config
+E:\Source\BUD\BizUnitDesigner\BizUnitDesigner\bin\Release\BizUnitDesigner.exe
+E:\Source\BUD\BizUnitDesigner\BizUnitDesigner\bin\Release\BizUnitDesigner.pdb
+E:\Source\BUD\BizUnitDesigner\BizUnitDesigner\obj\Release\BizUnitDesigner.Designer.resources
+E:\Source\BUD\BizUnitDesigner\BizUnitDesigner\obj\Release\BizUnitDesigner.TestHarness.resources
+E:\Source\BUD\BizUnitDesigner\BizUnitDesigner\obj\Release\BizUnitDesigner.Properties.Resources.resources
+E:\Source\BUD\BizUnitDesigner\BizUnitDesigner\obj\Release\BizUnitDesigner.PropertyHelper.resources
+E:\Source\BUD\BizUnitDesigner\BizUnitDesigner\obj\Release\BizUnitDesigner.csproj.GenerateResource.Cache
+E:\Source\BUD\BizUnitDesigner\BizUnitDesigner\obj\Release\BizUnitDesigner.exe
+E:\Source\BUD\BizUnitDesigner\BizUnitDesigner\obj\Release\BizUnitDesigner.pdb
+E:\Source\BUD\BizUnitDesigner\BizUnitDesigner\obj\Release\BizUnitDesigner.csprojResolveAssemblyReference.cache

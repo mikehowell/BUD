@@ -1,0 +1,50 @@
+﻿<TestCase testName="Test_09_StartPerfmon">
+
+	<TestSetup>
+
+		<!-- Stop Perfmon counters -->
+		<TestStep assemblyPath="" typeName="BizUnit.ExecuteCommandStep" failOnError="false">
+			<ProcessName>logman</ProcessName>
+			<ProcessParams>stop BTSPerfTest01</ProcessParams>
+			<WorkingDirectory>c:\</WorkingDirectory>
+		</TestStep>
+
+		<!-- Logman seems to need some time to stop -->
+		<TestStep assemblyPath="" typeName="BizUnit.DelayStep">
+			<Delay>1000</Delay>
+		</TestStep>
+
+		<!-- Delete Perfmon counters if they exist...-->
+		<TestStep assemblyPath="" typeName="BizUnit.ExecuteCommandStep" failOnError="false">
+			<ProcessName>logman</ProcessName>
+			<ProcessParams>delete BTSPerfTest01</ProcessParams>
+			<WorkingDirectory>c:\</WorkingDirectory>
+		</TestStep>
+
+	</TestSetup>
+
+	<TestExecution>
+
+		<!-- Create Perfmon counters -->
+		<TestStep assemblyPath="" typeName="BizUnit.ExecuteCommandStep">
+			<ProcessName>logman</ProcessName>
+			<ProcessParams>create counter BTSPerfTest01 -cf "C:\Program Files\Microsoft Services\BizUnit 2.1\Src\SDK\BizUnitFunctionalTests\TestData\Test_08_PerfCounters.txt" -si 5 -o "C:\Program Files\Microsoft Services\BizUnit 2.1\Src\SDK\BizUnitFunctionalTests\TestData\BTS_Run01.blg" --v</ProcessParams>
+			<WorkingDirectory>c:\</WorkingDirectory>
+		</TestStep>
+
+		<!-- Start Perfmon counters -->
+		<TestStep assemblyPath="" typeName="BizUnit.ExecuteCommandStep">
+			<ProcessName>logman</ProcessName>
+			<ProcessParams>start BTSPerfTest01</ProcessParams>
+			<WorkingDirectory>c:\</WorkingDirectory>
+		</TestStep>
+
+	</TestExecution>
+
+	<!-- Test cleanup: test cases should always leave the system in the state they found it -->
+	<TestCleanup>
+
+	</TestCleanup>
+
+</TestCase>
+

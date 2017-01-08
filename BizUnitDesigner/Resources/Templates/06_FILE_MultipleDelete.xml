@@ -1,0 +1,29 @@
+﻿<TestCase testName="Test_06_FILE_Delete">
+
+	<TestSetup>
+	</TestSetup>
+	
+	<TestExecution>
+		<TestStep assemblyPath="" typeName="BizUnit.FileCreateStep">
+			<SourcePath>..\..\..\TestData\InDoc1.xml</SourcePath>
+			<CreationPath>..\..\..\Rec_03\InDoc1_FOO_.xml</CreationPath>
+		</TestStep>
+		
+		<TestStep assemblyPath="" typeName="BizUnit.FileCreateStep">
+			<SourcePath>..\..\..\TestData\InDoc1.xml</SourcePath>
+			<CreationPath>..\..\..\Rec_03\InDoc1_BAR_.xml</CreationPath>
+		</TestStep>
+
+		<TestStep assemblyPath="" typeName="BizUnit.FileDeleteMultipleStep">
+			<Directory>..\..\..\Rec_03\</Directory>
+			<SearchPattern>*.xml</SearchPattern>
+		</TestStep>
+				
+	</TestExecution>
+
+	<!-- Test cleanup: test cases should always leave the system in the state they found it -->
+	<TestCleanup>
+	</TestCleanup>	
+	
+</TestCase>
+

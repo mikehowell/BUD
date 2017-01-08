@@ -1,0 +1,41 @@
+﻿<TestCase testName="Test_08_PerfmonTest">
+
+	<TestSetup>
+
+	</TestSetup>
+
+	<TestExecution>
+
+		<!-- Start Perfmon counters -->
+		<TestStep assemblyPath="" typeName="BizUnit.PerfmonCountersStep">
+			<PerfmonAction>Start</PerfmonAction>
+			<CounterSetName>BTSPerfTest01</CounterSetName>
+			<CountersListFilePath>C:\Program Files\Microsoft Services\BizUnit 2.1\Src\SDK\BizUnitFunctionalTests\TestData\Test_08_PerfCounters.txt</CountersListFilePath>
+			<SampleInterval>5</SampleInterval>
+			<PerfmonLogFilePath>C:\Program Files\Microsoft Services\BizUnit 2.1\Src\SDK\BizUnitFunctionalTests\TestData\BTS_Run01_%ServerName%_%DateTime%.blg</PerfmonLogFilePath>
+		</TestStep>
+
+		<TestStep assemblyPath="" typeName="BizUnit.DelayStep">
+			<Delay>5000</Delay>
+		</TestStep>
+
+
+	</TestExecution>
+
+	<!-- Test cleanup: test cases should always leave the system in the state they found it -->
+	<TestCleanup>
+
+		<TestStep assemblyPath="" typeName="BizUnit.PerfmonCountersStep">
+			<PerfmonAction>Stop</PerfmonAction>
+			<CounterSetName>BTSPerfTest01</CounterSetName>
+		</TestStep>
+
+		<TestStep assemblyPath="" typeName="BizUnit.ExecuteCommandStep" failOnError="false">
+			<ProcessName>logman</ProcessName>
+			<ProcessParams>delete BTSPerfTest01</ProcessParams>
+		</TestStep>
+
+	</TestCleanup>
+
+</TestCase>
+

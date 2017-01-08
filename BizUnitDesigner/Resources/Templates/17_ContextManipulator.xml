@@ -1,0 +1,22 @@
+﻿<TestCase testName="Test_17_ContextManipulator">
+
+	<TestSetup>
+	</TestSetup>
+
+	<TestExecution>
+
+	<TestStep assemblyPath="" typeName="BizUnit.ContextManipulatorStep">
+		<ContextItem contextKey="Test_17_ContextManipulator">
+			<ItemTest>Value=</ItemTest>
+			<ItemTest>42</ItemTest>
+		</ContextItem>
+	</TestStep>
+			
+	</TestExecution>
+
+	<!-- Test cleanup: test cases should always leave the system in the state they found it -->
+	<TestCleanup>
+	</TestCleanup>
+
+</TestCase>
+

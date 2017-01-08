@@ -1,0 +1,39 @@
+<TestCase testName="Test_11_WaitOnFile">
+
+  <TestSetup>
+    <TestStep assemblyPath="" typeName="BizUnit.FileDeleteStep" failOnError="false">
+      <FileToDeletePath>..\..\..\Rec_03\InDoc1.xml</FileToDeletePath>
+    </TestStep>
+  </TestSetup>
+
+  <TestExecution>
+
+    <!-- Run this step concurrently... -->
+    <TestStep assemblyPath="" typeName="BizUnit.WaitOnFileStep" runConcurrently="true">
+		<Path>..\..\..\Rec_03</Path>
+		<FileFilter>*.xml</FileFilter>
+      <TimeOut>10000</TimeOut>      
+    </TestStep>
+
+    <!-- Wait a second and a half... -->
+    <TestStep assemblyPath="" typeName="BizUnit.DelayStep">
+      <Delay>1500</Delay>      
+    </TestStep>
+
+    <!-- Drop the file, after which the WaitOnFileStep should suceed -->
+    <TestStep assemblyPath="" typeName="BizUnit.FileCreateStep">
+      <SourcePath>..\..\..\TestData\InDoc1.xml</SourcePath>
+      <CreationPath>..\..\..\Rec_03\TransactionId_{87654321-D6AB-4aa9-A772-938972E3FD51}.xml</CreationPath>
+    </TestStep>
+
+  </TestExecution>
+
+  <!-- Test cleanup: test cases should always leave the system in the state they found it -->
+  <TestCleanup>
+    <TestStep assemblyPath="" typeName="BizUnit.FileDeleteStep">
+      <FileToDeletePath>..\..\..\Rec_03\InDoc1.xml</FileToDeletePath>
+    </TestStep>
+  </TestCleanup>
+
+</TestCase>
+

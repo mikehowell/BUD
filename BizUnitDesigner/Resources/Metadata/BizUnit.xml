@@ -1,0 +1,3706 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BizUnit</name>
+    </assembly>
+    <members>
+        <member name="T:BizUnit.WaitOnFileStep">
+            <summary>
+            The WaitOnFileStep is used to wait for a FILE to be written to a given location.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.WaitOnFileStep">
+            	<Path>n:\\</Path>
+            	<FileFilter>*.xml</FileFilter>
+            	<TimeOut>10000</TimeOut>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>Path</term>
+            		<description>The directory to look for the FILE</description>
+            	</item>
+            	<item>
+            		<term>FileFilter</term>
+            		<description>The FILE mask to be used to search for a FILE, e.g. *.xml</description>
+            	</item>
+            	<item>
+            		<term>TimeOut</term>
+            		<description>The time to wait for the FILE to become present in miliseconds</description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="T:BizUnit.ITestStep">
+             <summary>
+             The ITestStep interface is implemented by test steps.
+             </summary>
+             
+             <remarks>
+             The following example demonstrates how to create and call BizUnit:
+             
+             <code escaped="true">
+            	public class DelayStep : ITestStep
+            	{
+            		public void Execute(XmlNode testConfig, Context context)
+            		{
+            			int timeOut = context.ReadConfigAsInt32( testConfig, "Delay" );
+            
+            			context.LogInfo("About to wait for {0} milli seconds...", timeOut.ToString());
+            
+            			Thread.Sleep(timeOut);
+            
+            			context.LogInfo("A delay of {0} milliseconds has successfully completed.", timeOut.ToString());
+            		}
+            	}
+            	</code>
+            	
+            	</remarks>
+        </member>
+        <member name="M:BizUnit.ITestStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            Called by the BizUnit framework to execute the test step
+            </summary>
+            
+            <param name='testConfig'>The Xml fragment containing the configuration for the test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="M:BizUnit.WaitOnFileStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:BizUnit.SOAPHTTPRequestResponseStep" -->
+        <member name="M:BizUnit.SOAPHTTPRequestResponseStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="M:BizUnit.SOAPHTTPRequestResponseStep.GetProxyFileName">
+            <summary>
+            Returns a name that can be used for the proxy assembly.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:BizUnit.DBQueryReturnXmlStep">
+             <summary>
+             The DBQueryReturnXmlStep queries a database and returns the response in Xml. It incorporates the context loader and 
+             validation sub steps and is useful for testing scenarios where BizTalk communicates with SQL server via the SQL adapter
+             </summary>
+             
+             <remarks>
+             The following shows an example of the Xml representation of this test step.
+             
+             <code escaped="true">
+            	<TestStep assemblyPath="" typeName="BizUnit.DBQueryReturnXmlStep">
+            		<DelayBeforeCheck>1</DelayBeforeCheck>
+            		<ConnectionString>Persist Security Info=False;Integrated Security=SSPI;database=DBname;server=(local);Connect Timeout=30</ConnectionString>
+            		<RootElement>RootNodeName</RootElement>
+            		<AllowEmpty>true|false</AllowEmpty>
+            		<!-- 
+            		The SQL Query to execute is built by formatting the RawSQLQuery substituting in the 
+            		SQLQueryParam's
+            		-->
+            		<SQLQuery>
+            			<!-- The query that returns Xml (probably using For Xml) -->
+            			<RawSQLQuery>Exec stordeprocedure</RawSQLQuery>
+            			<SQLQueryParams>
+            				<SQLQueryParam takeFromCtx="EventId"></SQLQueryParam>
+            			</SQLQueryParams>
+            		</SQLQuery>
+            		
+            		<!-- The Context loader will act upon the xml returned from the above Sql Statement  -->
+            		<ContextLoaderStep assemblyPath="" typeName="BizUnit.XmlContextLoader">
+            			<XPath contextKey="HTTP_Url">/def:html/def:body/def:p[2]/def:form</XPath>
+            			<XPath contextKey="ActionID">/def:html/def:body/def:p[2]/def:form/def:input[3]</XPath>
+            			<XPath contextKey="ActionType">/def:html/def:body/def:p[2]/def:form/def:input[4]</XPath>
+            			<XPath contextKey="HoldEvent">/def:html/def:body/def:p[2]/def:form/def:input[2]</XPath>
+            		</ContextLoaderStep>
+            
+            	    <!-- Note: Validation step could be any generic validation step -->	
+            		<ValidationStep assemblyPath="" typeName="BizUnit.XmlValidationStep">
+            			<XmlSchemaPath>.\TestData\PurchaseOrder.xsd</XmlSchemaPath>
+            			<XmlSchemaNameSpace>http://SendMail.PurchaseOrder</XmlSchemaNameSpace>
+            			<XPathList>
+            				<XPathValidation query="/*[local-name()='PurchaseOrder' and namespace-uri()='http://SendMail.PurchaseOrder']/*[local-name()='PONumber' and namespace-uri()='']">PONumber_0</XPathValidation>
+            			</XPathList>
+            		</ValidationStep>			
+            	</TestStep>
+            	</code>
+            	
+            	The ContextManipulator builds a new context item by appeanding the values of multiple context items
+            	<list type="table">
+            		<listheader>
+            			<term>Tag</term>
+            			<description>Description</description>
+            		</listheader>
+            		<item>
+            			<term>DelayBeforeCheck</term>
+            			<description>The number of seconds to wait before executing the step</description>
+            		</item>
+            		<item>
+            			<term>ConnectionString</term>
+            			<description>The connection string used for the DB query</description>
+            		</item>
+            		<item>
+            			<term>RootElement</term>
+            			<description>The name of the element which will serve as the root element for the returned Xml</description>
+            		</item>
+            		<item>
+            			<term>AllowEmpty</term>
+            			<description>Boolean value specifying whether an error should be raised if no Xml is returned. Specify true to raise an error</description>
+            		</item>
+            		<item>
+            			<term>SQLQuery/RawSQLQuery</term>
+            			<description>The raw SQL string that will be formatted by substituting in the SQLQueryParam</description>
+            		</item>
+            		<item>
+            			<term>SQLQuery/SQLQueryParams/SQLQueryParam</term>
+            			<description>The parameters to substitute into RawSQLQuery <para>(repeating)</para></description>
+            		</item>
+            	</list>
+            	</remarks>
+        </member>
+        <member name="M:BizUnit.DBQueryReturnXmlStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>		
+        </member>
+        <member name="T:BizUnit.ConsoleWritter">
+            <summary>
+            Summary description for ConsoleWritter.
+            </summary>
+        </member>
+        <member name="T:BizUnit.ILogWritter">
+            <summary>
+            Summary description for ILogWritter.
+            </summary>
+        </member>
+        <member name="M:BizUnit.ILogWritter.WriteLine(System.String)">
+            <summary>
+            Called by the BizUnit framework to write a line of text to the log file
+            </summary>
+            
+            <param name='s'>The text to be written</param>
+        </member>
+        <member name="M:BizUnit.ILogWritter.WriteLine(System.String,System.Object[])">
+            <summary>
+            Called by the BizUnit framework to write a line of text to the log file
+            </summary>
+            
+            <param name='s'>The text to be formatted with args and then written</param>
+            <param name='args'>The arguments to be formatted into 's'</param>
+        </member>
+        <member name="T:BizUnit.FileDeleteMultipleStep">
+            <summary>
+            The FileDeleteMultipleStep deletes a FILE specified at a given location.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.FileDeleteMultipleStep">
+            	<Directory>C:\Recv2\</Directory>
+            	<SearchPattern>{*}.xml</SearchPattern>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>Directory</term>
+            		<description>The directory to search for files to delete</description>
+            	</item>
+            	<item>
+            		<term>SearchPattern</term>
+            		<description>The FILE mask used to search for FILE's to delete, e.g. PO_{*}.xml will delete files such as PO_{87108BAF-6812-418D-A89D-3A2D68E98926}.xml</description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.FileDeleteMultipleStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.PerfMonCounterMonitorStep">
+            <summary>
+            The PerfMonCounterMonitorStep is used to monitor a perfmon counter 
+            until it reaches a target value. If the counter reaches the target 
+            value within the timeout period the step will succeed, otherwise it 
+            will fail.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.PerfMonCounterMonitorStep">
+            	<CategoryName>BizTalk:Message Box:Host Counters</CategoryName>
+                <CounterName>Host Queue - Length</CounterName>
+                <InstanceName>Host:BizTalkMsgBoxDB:ServerName</InstanceName>
+                <Server>BLIZARD001</Server>
+                <CounterTargetValue>50.0</CounterTargetValue>
+                <SleepTime>100</SleepTime>
+                <TimeOut>100</TimeOut>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>CategoryName</term>
+            		<description>The name of the perfmon category</description>
+            	</item>
+            	<item>
+            		<term>CounterName</term>
+            		<description>The name of the perfmon counter to monitor</description>
+            	</item>
+            	<item>
+            		<term>InstanceName</term>
+            		<description>The perfmon counter instance name<para>(optional)</para></description>
+            	</item>
+            	<item>
+            		<term>Server</term>
+            		<description>The name of the server to monitor the counter on</description>
+            	</item>
+            	<item>
+            		<term>CounterTargetValue</term>
+            		<description>The target perfmon counter value, once the counter reaches this value the step will complete</description>
+            	</item>
+            	<item>
+            		<term>SleepTime</term>
+            		<description>The length of the delay in miliseconds between checks of the counter<para>(optional)</para></description>
+            	</item>
+            	<item>
+            		<term>TimeOut</term>
+            		<description>The maximum length of time the step will spend checking the counter (seconds)<para>(optional)</para></description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.PerfMonCounterMonitorStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.MSMQCreateQueueStep">
+            <summary>
+            The MSMQCreateQueueStep creates one or more new MSMQ queues
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.MSMQCreateQueueStep">
+            	<QueuePath transactional="true">.\Private$\Test01</QueuePath>
+            	<QueuePath transactional="true">.\Private$\Test02</QueuePath>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>QueueName</term>
+            		<description>The name of the MSMQ queue to create, e.g. .\Private$\Test02 <para>(one or more)</para></description>
+            	</item>
+            	<item>
+            		<term>QueueName/@transactional</term>
+            		<description>If true, the queue created will be transactional</description>
+            	</item>
+            </list>
+            </remarks>	
+        </member>
+        <member name="M:BizUnit.MSMQCreateQueueStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.FilesExistStep">
+            <summary>
+            The FilesExistStep step determines the number of file in the specified directory which match the search pattern
+            and compares this to the expected result.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.FilesExistStep">
+            	<Timeout>3000</Timeout>
+            	<DirectoryPath>.\Rec_03</DirectoryPath>
+            	<SearchPattern>*.xml</SearchPattern>
+            	<ExpectedNoOfFiles>1</ExpectedNoOfFiles>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>Timeout</term>
+            		<description>Time to wait before checking</description>
+            	</item>
+            	<item>
+            		<term>DirectoryPath</term>
+            		<description>Directory path to check</description>
+            	</item>
+            	<item>
+            		<term>SearchPattern</term>
+            		<description>Matching pattern for files</description>
+            	</item>
+            	<item>
+            		<term>ExpectedNoOfFiles</term>
+            		<description>Expected number of files</description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.FilesExistStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.MSMQWriteStep">
+            <summary>
+            The MSMQWriteStep writes a message to an MSMQ queue and optionally validates the contents of it
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.MSMQWriteStep">
+            	<SourcePath>.\TestData\InDoc1.xml</SourcePath>
+            	<QueuePath>.\Private$\Test01</QueuePath>
+            	<MessageLabel>MSMQ_To_MSMQ_Test_Test_01</MessageLabel>
+            	<CorrelationId>1234</CorrelationId>
+            	<AppSpecific>5678</AppSpecific>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>SourcePath</term>
+            		<description>The FILE containing the data to be written to an MSMQ queue</description>
+            	</item>
+            	<item>
+            		<term>QueuePath</term>
+            		<description>The MSMQ queue to write a new message to</description>
+            	</item>
+            	<item>
+            		<term>MessageLabel</term>
+            		<description>The MSMQ label to associate with the new message</description>
+            	</item>
+            	<item>
+            		<term>CorrelationId</term>
+            		<description>The MSMQ CorrelationId to associate with the new message</description>
+            	</item>
+            	<item>
+            		<term>AppSpecific</term>
+            		<description>The MSMQ AppSpecific property to associate with the new message (int32)</description>
+            	</item>
+            </list>
+            </remarks>	
+        </member>
+        <member name="M:BizUnit.MSMQWriteStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.MSMQDeleteQueueStep">
+            <summary>
+            The MSMQDeleteQueueStep deletes one or more MSMQ queues
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.MSMQDeleteQueueStep">
+            	<QueuePath>.\Private$\Test01</QueuePath>
+            	<QueuePath>.\Private$\Test02</QueuePath>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>QueueName</term>
+            		<description>The name of the MSMQ queue to delete, e.g. .\Private$\Test02 <para>(one or more)</para></description>
+            	</item>
+            </list>
+            </remarks>	
+        </member>
+        <member name="M:BizUnit.MSMQDeleteQueueStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.FileMultiValidateStep">
+            <summary>
+            The FileMultiValidateStep step checks a given directory for files matching the file masks and iterates around all of the specified validate steps
+            to validate the file.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.FileMultiValidateStep">
+                <Timeout>6000</Timeout>
+                <DirectoryPath>.\Rec_01</DirectoryPath>
+                <SearchPattern>*.xml</SearchPattern>
+            		
+            	<!-- Note: Validation step could be any generic validation step -->	
+            	<ValidationStep assemblyPath="" typeName="BizUnit.XmlValidationStep">
+            	    <XmlSchemaPath>.\TestData\PurchaseOrder.xsd</XmlSchemaPath>
+            		<XmlSchemaNameSpace>http://SendMail.PurchaseOrder</XmlSchemaNameSpace>
+            		<XPathList>
+            		    <XPathValidation query="/*[local-name()='PurchaseOrder' and namespace-uri()='http://SendMail.PurchaseOrder']/*[local-name()='PONumber' and namespace-uri()='']">PONumber_0</XPathValidation>
+            		</XPathList>
+                </ValidationStep>
+                			
+            	<ValidationStep assemblyPath="" typeName="BizUnit.XmlValidationStep">
+            	    <XmlSchemaPath>.\TestData\SalesOrder.xsd</XmlSchemaPath>
+            		<XmlSchemaNameSpace>http://SendMail.SalesOrder</XmlSchemaNameSpace>
+            		<XPathList>
+            		    <XPathValidation query="/*[local-name()='PurchaseOrder' and namespace-uri()='http://SendMail.SalesOrder']/*[local-name()='PONumber' and namespace-uri()='']">PONumber_0</XPathValidation>
+            		</XPathList>
+                </ValidationStep>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>Timeout</term>
+            		<description>Time to wait before checking</description>
+            	</item>
+            	<item>
+            		<term>DirectoryPath</term>
+            		<description>Directory path to check</description>
+            	</item>
+            	<item>
+            		<term>SearchPattern</term>
+            		<description>Matching pattern for files</description>
+            	</item>
+            	<item>
+            		<term>ValidationStep</term>
+            		<description>The validation step to use against the files <para>(one or more)</para></description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.FileMultiValidateStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.CheckPop3MailStep">
+            <summary>
+            The CheckPop3MailStep reads email from a POP3 server.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.CheckPop3MailStep">
+            	<DelayBeforeCheck>0</DelayBeforeCheck> <!-- Optional, seconds to delay performing check -->
+            	<Server>localhost</Server>
+            	<User>david.regan@virtualbank.com</User>
+            	<Password>Password</Password>
+            	<From>KYC@virtualbank.com</From>
+            	<Subject>My task cancelled</Subject>
+            	<ShowBody>true|false</ShowBody> <!-- default false -->
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>DelayBeforeCheck</term>
+            		<description>The delay before checking the POP3 server (optional)</description>
+            	</item>
+            	<item>
+            		<term>Server</term>
+            		<description>The POP3 server</description>
+            	</item>
+            	<item>
+            		<term>User</term>
+            		<description>The user name</description>
+            	</item>
+            	<item>
+            		<term>Password</term>
+            		<description>The password for the user name</description>
+            	</item>
+            	<item>
+            		<term>From</term>
+            		<description>The Tracking directory for BizTalk Server</description>
+            	</item>
+            	<item>
+            		<term>Subject</term>
+            		<description>The subject of the email to read</description>
+            	</item>
+            	<item>
+            		<term>ShowBody</term>
+            		<description>true|false <para>(optional, default = false)</para></description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.CheckPop3MailStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.RegExValidationStep">
+            <summary>
+            The RegExValidationStep is used to validate a data stream by evaluating one or more regular expressions against it.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <ValidationStep assemblyPath="" typeName="BizUnit.RegExValidationStep">
+            	<ValidationRegEx>Event Type   - Switch</ValidationRegEx>
+            	<ValidationRegEx>{1:[a-z]3</ValidationRegEx>
+            </ValidationStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>ValidationRegEx</term>
+            		<description>The regualar expression to be evaluated <para>(repeating)</para></description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="T:BizUnit.IValidationStep">
+             <summary>
+             The IValidationStep interface is implemented by test steps that perform validation against data.
+             </summary>
+             
+             <remarks>
+             The following example demonstrates how to create and call BizUnit:
+             
+             <code escaped="true">
+            	public class BinaryValidation : IValidationStep
+            	{
+            		public void ExecuteValidation(Stream data, XmlNode validatorConfig, Context context)
+            		{
+            			MemoryStream dataToValidateAgainst = null;
+            
+            			string comparisonDataPath = context.ReadConfigAsString( validatorConfig, "ComparisonDataPath" );
+            
+            			try
+            			{
+            				try
+            				{
+            					dataToValidateAgainst = StreamHelper.LoadFileToStream(comparisonDataPath);
+            				}
+            				catch(Exception e)
+            				{
+            					context.LogError( "BinaryValidation failed, exception caugh trying to open comparison file: {0}", comparisonDataPath  );
+            					throw;
+            				}
+            
+            				try
+            				{
+            					StreamHelper.CompareStreams( data, dataToValidateAgainst );
+            				}
+            				catch(Exception e)
+            				{
+            					context.LogError( "Binary validation failed while comparing the two data streams with the following exception: {0}", e.ToString() );
+            					throw;
+            				}
+            			}
+            			finally
+            			{
+            				if ( null != dataToValidateAgainst )
+            				{
+            					dataToValidateAgainst.Close();
+            				}
+            			}
+            		}
+            	}
+            	</code>
+            	
+            	</remarks>
+        </member>
+        <member name="M:BizUnit.IValidationStep.ExecuteValidation(System.IO.Stream,System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            Called by the BizUnit framework to execute the validation test step
+            </summary>
+            
+            <param name='data'>The stream cintaining the data to be validated.</param>
+            <param name='validatorConfig'>The Xml fragment containing the configuration for the test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="M:BizUnit.RegExValidationStep.ExecuteValidation(System.IO.Stream,System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            IValidationStep.ExecuteValidation() implementation
+            </summary>
+            <param name='data'>The stream cintaining the data to be validated.</param>
+            <param name='validatorConfig'>The Xml fragment containing the configuration for the test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.Pop3.Pop3MessageComponents">
+            <summary>
+            Summary description for Pop3MessageBody.
+            </summary>
+        </member>
+        <member name="T:BizUnit.FileDeleteStep">
+            <summary>
+            The FileDeleteStep deletes a FILE specified at a given location.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.FileDeleteStep">
+            	<FileToDeletePath>.\Rec_01\InDoc1.xml</FileToDeletePath>
+            	<FileToDeletePath>.\Rec_01\InDoc2.xml</FileToDeletePath>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>FileToDeletePath</term>
+            		<description>The location of FILE to be deleted<para>(one or more)</para></description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.FileDeleteStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.ExportDBDataToDataSetStep">
+             <summary>
+             ExportDBDataToDataSetStep exports data contained in a list of tables to a Xml file. The export is carried out using the WriteXml capability of the DataSet.
+             </summary>
+            
+             <remarks>
+             <code escaped="true">
+             <TestStep assemblyPath="" typeName="BizUnit.ExportDBTableDataToDatasetStep">
+            		<DelayBeforeExecution>0</DelayBeforeExecution> <!-- Optional, seconds to delay for this step to complete -->
+            		<ConnectionString>Persist Security Info=False;Integrated Security=SSPI;database=DBname;server=(local);Connect Timeout=30</ConnectionString>
+            		<DatasetWriteXmlSchemaPath>C:\DBDtableSchema.xml</DatasetWriteXmlSchemaPath>
+            		<DatasetWriteXmlPath>C:\DBDtable.xml</DatasetWriteXmlPath>
+            		<TableNames>Orders,OrderDetails</TableNames>
+             </TestStep>
+             </code>
+             
+            	<list type="table">
+            		<listheader>
+            			<term>Tag</term>
+            			<description>Description</description>
+            		</listheader>
+            		<item>
+            			<term>DelayBeforeExecution</term>
+            			<description>The number of seconds to wait before executing the step</description>
+            		</item>
+            		<item>
+            			<term>ConnectionString</term>
+            			<description>The connection string specifying the database from which a DataSet will be exported</description>
+            		</item>
+            		<item>
+            			<term>DatasetWriteXmlSchemaPath</term>
+            			<description>File location where the Xml schema represenation of the DataSet should be saved</description>
+            		</item>
+            		<item>
+            			<term>DatasetWriteXmlPath</term>
+            			<description>File location where the Xml representation of the DataSet data should be saved</description>
+            		</item>
+            		<item>
+            			<term>TableNames</term>
+            			<description>Comma-separated list of tablenames that should be exported in the DataSet</description>
+            		</item>
+            	</list>
+             </remarks>	
+        </member>
+        <member name="M:BizUnit.ExportDBDataToDataSetStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.CreateDirectory">
+            <summary>
+            The CreateDirectory creates a new Directory.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.CreateDirectory">
+            	<DirectoryName>.\TestData\InDoc1.xml</DirectoryName>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>DirectoryName</term>
+            		<description>The name of the directory to create</description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.CreateDirectory.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.TextContextLoader">
+            <summary>
+            The TextContextLoader searches the source data and adds the value into the context.
+            </summary>
+            
+            <remarks>
+            <para>Here's the SearchString, but then skip this bit and return: TargetFindString</para>
+            
+            <para>searchString="SearchString" skipNumber="37" stringLength="16"</para>
+            
+            <para>The following shows an example of the Xml representation of this test step.</para>
+            
+            <code escaped="true">
+            <ContextLoaderStep assemblyPath="" typeName="BizUnit.TextContextLoader">
+            	<Item contextKey="KeyString" searchString="SearchString" skipNumber="37" stringLength="16"/>
+            </ContextLoaderStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>Item/@contextKey</term>
+            		<description>The name of context key which will be used when addin the new context item</description>
+            	</item>
+            	<item>
+            		<term>Item/@searchString</term>
+            		<description>The string used to search for</description>
+            	</item>
+            	<item>
+            		<term>Item/@skipNumber</term>
+            		<description>The number of characters to skip after the search string</description>
+            	</item>
+            	<item>
+            		<term>Item/@stringLength</term>
+            		<description>The number of characters after skipNumber</description>
+            	</item>
+            </list>
+            </remarks>	
+        </member>
+        <member name="T:BizUnit.IContextLoaderStep">
+             <summary>
+             The IContextLoaderStep interface is implemented by test steps which need to load data into the context.
+             </summary>
+             
+             <remarks>
+             The following example demonstrates how to create and call BizUnit:
+             
+             <code escaped="true">
+            	public class XmlContextLoader : IContextLoaderStep
+            	{
+            		public void ExecuteContextLoader(Stream data, XmlNode contextConfig, Context context)
+            		{
+            			XmlNodeList contextNodes = contextConfig.SelectNodes("XPath");
+            
+            			StreamReader sr = new StreamReader( data );
+            			string strData = sr.ReadToEnd();
+            
+            			XmlDocument doc = new XmlDocument();
+            			doc.Load( data );
+            
+            			foreach (XmlNode contextNode in contextNodes)
+            			{
+            				string contextKey = contextNode.SelectSingleNode("@contextKey").Value;
+            				string xpathExp = contextNode.SelectSingleNode(".").InnerText;
+            
+            				context.LogInfo("XmlContextLoader loading key:{0} with value:\"{1}\"", contextKey, xpathExp );
+            
+            				XmlNode node = doc.SelectSingleNode( xpathExp );
+            
+            				context.Add( contextKey, node.InnerText );
+            			}
+            		}
+            	}
+            	</code>
+            	
+            	</remarks>
+        </member>
+        <member name="M:BizUnit.IContextLoaderStep.ExecuteContextLoader(System.IO.Stream,System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ExecuteContextLoader is called by the BizUnit framework to execute the context loader test step.
+            </summary>
+            <param name="data">The data which the values are read from.</param>
+            <param name="contextConfig">The configuration for the context loader test step.</param>
+            <param name="context">The context object into which the values will be written.</param>
+        </member>
+        <member name="M:BizUnit.TextContextLoader.ExecuteContextLoader(System.IO.Stream,System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            IContextLoaderStep.ExecuteContextLoader() implementation
+            </summary>
+            <param name="data">The data which the values are read from.</param>
+            <param name="contextConfig">The configuration for the context loader test step.</param>
+            <param name="context">The context object into which the values will be written.</param>
+        </member>
+        <member name="T:BizUnit.Pop3.Pop3StateObject">
+            <summary>
+            Holds the current state of the client
+            socket.
+            </summary>
+        </member>
+        <member name="T:BizUnit.Pop3.Pop3Component">
+            <summary>
+            Summary description for Pop3Attachment.
+            </summary>
+        </member>
+        <member name="T:BizUnit.FileReadAndLoadToContext">
+            <summary>
+            The FileReadAndLoadToContext reads a FILE from a given locaton and loads the contents into the context.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.FileReadAndLoadToContext">
+            	<FilePath>C:\Recv2\data.xml</FilePath>
+            	<ContextPropertyName>PerfmonCounterList</ContextPropertyName>
+            	<TimeOut>2000</TimeOut>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>FilePath</term>
+            		<description>The path to the FILE to read</description>
+            	</item>
+            	<item>
+            		<term>ContextPropertyName</term>
+            		<description>The name of the context property to write the FILE to</description>
+            	</item>
+            	<item>
+            		<term>TimeOut</term>
+            		<description>The time to wait for the FILE (milli seconds)(optional)</description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.FileReadAndLoadToContext.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.EventLogClearStep">
+            <summary>
+            The EventLogClearStep test step clears the event log. Note: caution should be taken when clearing event log.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.EventLogClearStep">
+            	<Machine>UKBTSTEST01</Machine>
+            	<EventLog>Application</EventLog>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>Machine</term>
+            		<description>The name of the machine where the event log should be cleared <para>(optional, defaults to local machine)</para></description>
+            	</item>
+            	<item>
+            		<term>EventLog</term>
+            		<description>The event log to clear, e.g. Application, System etc.</description>
+            	</item>
+            </list>
+            </remarks>	
+        </member>
+        <member name="M:BizUnit.EventLogClearStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.Logger">
+            <summary>
+            The BizUnit Logger is used to log data from BizUnit and test steps.
+            </summary>
+        </member>
+        <member name="T:BizUnit.COMInteropUtils">
+            <summary>
+            COM Interop helper class		
+            </summary>
+        </member>
+        <member name="M:BizUnit.COMInteropUtils.COMReleaseObject(System.Object)">
+            <summary>
+            Helper method to release a reference to a COM object
+            </summary>
+            <param name="obj">The COM object</param>
+        </member>
+        <member name="T:BizUnit.CodeValidationStep">
+            <summary>
+            The CodeValidationStep validates expected results from the execution of a method, property or field.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <ValidationStep assemblyPath="" typeName="Microsoft.Services.UK.TestFramework.CodeValidationStep">
+            	<TypeName>SampleCodeValidator.CheckResults</TypeName>
+            	<AssemblyPath>SampleCodeValidator.dll</AssemblyPath>
+            	<Constructor>
+            		<Parameters>
+            			<Parameter value="test"/>
+            		</Parameters>
+            	</Constructor>
+            	<Member name="GetValue">
+            		<!-- input parms to method -->
+            		<Parameters>
+            			<Parameter name="A" value="1"/>
+            			<Parameter name="B" value="2"/>
+            			<Parameter name="C" value="test"/>
+            		</Parameters>
+            		<!-- output parms from method -->
+            		<Results>
+            			<Result value="foo"/> <!-- return value of member -->
+            			<Result name ="A" value="bar"/>
+            		</Results>
+            	</Member>
+            </ValidationStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>TypeName</term>
+            		<description>Fully qualified name of the type to create.</description>
+            	</item>
+            	<item>
+            		<term>AssemblyPath</term>
+            		<description>Location of the assembly on disk containing the required type.</description>
+            	</item>
+            	<item>
+            		<term>Constructor/Parameters/Parameter/@value</term>
+            		<description>Contains the parameters for the constructor to call for the desired type.<para>(Optional)</para></description>
+            	</item>
+            	<item>
+            		<term>Member/@name</term>
+            		<description>The name of the member (field/property/method) to invoke.<para>(Optional)</para></description>
+            	</item>
+            	<item>
+            		<term>Member/Parameters/Parameter/@name</term>
+            		<description>The required parameters for the member to invoke. Note that for overloaded members this step disambiguates by number of parameters only.<para>(Optional)</para></description>
+            	</item>
+            	<item>
+            		<term>Member/Parameters/Parameter/@value</term>
+            		<description>The required parameters for the member to invoke. Note that for overloaded members this step disambiguates by number of parameters only.<para>(Optional)</para></description>
+            	</item>
+            	<item>
+            		<term>Member/Results/Result/@name</term>
+            		<description>The result - either return value or ref/out parameter to test. To indicate that the result is the return value the name attribute should not be specified.<para>(Optional)</para></description>
+            	</item>
+            	<item>
+            		<term>Member/Results/Result/@value</term>
+            		<description>The result - either return value or ref/out parameter to test. To indicate that the result is the return value the name attribute should not be specified.<para>(Optional)</para></description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.CodeValidationStep.ExecuteValidation(System.IO.Stream,System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            used to check that the execution of a class-based fact has been successful
+            </summary>
+            <param name="data"></param>
+            <param name="validatorConfig"></param>
+            <param name="context"></param>
+        </member>
+        <member name="T:BizUnit.PerfmonCountersStep">
+            <summary>
+            The PerfmonCountersStep controls perfmon counters, it maybe used to start, and stop 
+            a set of perfmon counters
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.PerfmonCountersStep">
+            	<PerfmonAction>Start|Stop</PerfmonAction>
+                <CounterSetName>BTS-PerfTest01</CounterSetName>
+            	<CountersListFilePath>C:\Program Files\Microsoft Services\BizUnit 2.1\Src\SDK\BizUnitFunctionalTests\TestData\Test_08_PerfCounters.txt</CountersListFilePath>
+                <SampleInterval>5</SampleInterval>
+                <PerfmonLogFilePath>C:\Program Files\Microsoft Services\BizUnit 2.1\Src\SDK\BizUnitFunctionalTests\TestData\BTS_Run01_%DateTime%.blg</PerfmonLogFilePath>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>PerfmonAction</term>
+            		<description>Start or stop a counter set<para>(Start|Stop)</para></description>
+            	</item>
+            	<item>
+            		<term>CounterSetName</term>
+            		<description>The name of the perfmon counters to start recording<para>(only required if PerfmonAction=Start)</para></description>
+            	</item>
+            	<item>
+            		<term>CountersListFilePath</term>
+            		<description>The file containing the set of perfmon counters to record<para>(only required if PerfmonAction=Start)</para></description>
+            	</item>
+            	<item>
+            		<term>PerfmonLogFilePath</term>
+            		<description>The location to write the perfmon log file</description>
+            	</item>
+            	<item>
+            		<term>SampleInterval</term>
+            		<description>The interval to record perfmon counters (seconds)</description>
+            	</item>
+            	<item>
+            		<term>PerfmonLogFilePath</term>
+            		<description>The path of the perfmon log file</description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.PerfmonCountersStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.EventLogSaveStep">
+            <summary>
+            The EventLogSaveStep test step clears the event log. Note: caution should be taken when clearing event log.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.EventLogSaveStep">
+            	<Server>UKBTSTEST01</Server>
+            	<DestinationPath>C:\MyLogs\ApplicationLog.evt</DestinationPath>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>Server</term>
+            		<description>The name of the machine where the event log should be saved from</description>
+            	</item>
+            	<item>
+            		<term>DestinationPath</term>
+            		<description>The local path to save the event log to</description>
+            	</item>
+            </list>
+            </remarks>	
+        </member>
+        <member name="M:BizUnit.EventLogSaveStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.DelayStep">
+            <summary>
+            The DelayStep is used to perform a delay/sleep.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.DelayStep">
+            	<Delay>1000</Delay>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>Delay</term>
+            		<description>The length of the delay in miliseconds</description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.DelayStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.ConcurrentTestStepWrapper">
+            <summary>
+            Summary description for ConcurrentTestStepWrapper.
+            </summary>
+        </member>
+        <member name="T:BizUnit.XmlValidationStepEx">
+            <summary>
+            The XmlValidationStepEx validates an Xml document, it may validate against a given schema, and also evaluate XPath queries.
+            The Xpath query is extended from XmlValidationStep to allow Xpath functions to be used which may not return a node set.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <ValidationStep assemblyPath="" typeName="Microsoft.Services.UK.TestFramework.XmlValidationStepEx">
+            	<XmlSchemaPath>.\TestData\PurchaseOrder.xsd</XmlSchemaPath>
+            	<XmlSchemaNameSpace>urn:bookstore-schema</XmlSchemaNameSpace>
+            	<XPathList>
+            		<XPathValidation query="/*[local-name()='PurchaseOrder' and namespace-uri()='http://SendMail.PurchaseOrder']/*[local-name()='PONumber' and namespace-uri()='']">PONumber_0</XPathValidation>
+            	</XPathList>
+            </ValidationStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>XmlSchemaPath</term>
+            		<description>The XSD schema to use to validate the XML data <para>(optional)</para></description>
+            	</item>
+            	<item>
+            		<term>XmlSchemaNameSpace</term>
+            		<description>The XSD schema namespace to validate the XML data against <para>(optional)</para></description>
+            	</item>
+            	<item>
+            		<term>XPathList/XPathValidation</term>
+            		<description>XPath expression to evaluate against the XML document <para>(optional)(repeating)</para>.</description>
+            	</item>
+            	<item>
+            		<term>XPathList/XPathValidation/@query</term>
+            		<description>XPath expression to evaluate against the XML document <para>(optional)(repeating)</para>.</description>
+            	</item>
+            </list>
+            </remarks>	
+        </member>
+        <member name="M:BizUnit.XmlValidationStepEx.ExecuteValidation(System.IO.Stream,System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='data'>The stream cintaining the data to be validated.</param>
+            <param name='validatorConfig'>The Xml fragment containing the configuration for the test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.MSMQReadStep">
+             <summary>
+             The MSMQReadStep reads a message from an MSMQ queue and optionally validates the contents of it
+             </summary>
+             
+             <remarks>
+             The following shows an example of the Xml representation of this test step.
+             
+             <code escaped="true">
+            	<TestStep assemblyPath="" typeName="BizUnit.MSMQReadStep">
+            		<QueuePath>.\Private$\Test01</QueuePath>
+            		<Timeout>2000</Timeout>
+            		
+            		<ContextProperties>
+            			<ContextProperty MSMQProp="CorrelationId" CtxPropName="MSMQ_CorrelationId" />
+            			<ContextProperty MSMQProp="AppSpecific" CtxPropName="MSMQ_AppSpecific" />
+            			<ContextProperty MSMQProp="Label" CtxPropName="MSMQ_Label" />
+            		</ContextProperties>
+            		
+            		<ValidationStep assemblyPath="" typeName="BizUnit.BinaryValidation">
+            			<ComparisonDataPath>.\TestData\ResultDoc1.xml</ComparisonDataPath>
+            		</ValidationStep>
+            
+            	</TestStep>
+            	</code>
+            	
+            	<list type="table">
+            		<listheader>
+            			<term>Tag</term>
+            			<description>Description</description>
+            		</listheader>
+            		<item>
+            			<term>QueuePath</term>
+            			<description>The MSMQ queue to read a message from</description>
+            		</item>
+            		<item>
+            			<term>Timeout</term>
+            			<description>The timeout to wait for the message to appear in the queue, in milisecs</description>
+            		</item>
+            		<item>
+            			<term>ValidationStep</term>
+            			<description>The validation step that will be used to validate the contents of the message read from the queue (optional).</description>
+            		</item>
+            		<item>
+            			<term>ContextProperties/ContextProperty</term>
+            			<description>Allows properties from the MSMQ message to be written to the BizUnit context. 
+            			The MSMQProp attribute specifies the property on the MSMQ message, e.g. "CorrelationId", the 
+            			CtxPropName attribute specifies the name of the property to write the value of the MSMQ property to.
+            			<para>Note: All properties on System.Messaging.Message are supported.</para>
+            			<para>(Optional)(One or more)</para></description>
+            		</item>
+            	</list>
+            	</remarks>	
+        </member>
+        <member name="M:BizUnit.MSMQReadStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.FilesMoveStep">
+            <summary>
+            The FilesMoveStep step moves the contents of one directory to another based on the file mask supplied.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.FilesMoveStep">
+            	<SourceDirectory>.\Rec_03</SourceDirectory>
+            	<SearchPattern>*.xml</SearchPattern>
+            	<DestinationDirectory>.\Rec_04</DestinationDirectory>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>SourceDirectory</term>
+            		<description>Source directory for the files</description>
+            	</item>
+            	<item>
+            		<term>SearchPattern</term>
+            		<description>Matching pattern for files</description>
+            	</item>
+            	<item>
+            		<term>DestinationDirectory</term>
+            		<description>Destination directory for the files</description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.FilesMoveStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.FileMoveStep">
+            <summary>
+            The FileMoveStep moves a file from one directory to another.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.FileMoveStep">
+            	<SourcePath>.\Rec_01\InDoc1.xml</SourcePath>
+            	<DestinationPath>.\Output\InDoc1.xml</DestinationPath>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>SourcePath</term>
+            		<description>Source of the file</description>
+            	</item>
+            	<item>
+            		<term>DestinationPath</term>
+            		<description>Destination for the file</description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.FileMoveStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.DatabaseDeleteStep">
+            <summary>
+            The DatabaseDeleteStep step uses the supplied connection string, table name and condition to delete rows from the database
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.DatabaseDeleteStep">
+            	<ConnectionString>Server=localhost;Database=database;Trusted_Connection=True;</ConnectionString>
+            	<Table>table</Table>
+            	<Condition>id=1</Condition>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>ConnectionString</term>
+            		<description>Database connection string</description>
+            	</item>
+            	<item>
+            		<term>Table</term>
+            		<description>Table name to delete rows from</description>
+            	</item>
+            	<item>
+            		<term>Condition</term>
+            		<description>Condition to use</description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.DatabaseDeleteStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.XmlContextLoader">
+            <summary>
+            The XmlContextLoader evaluates an XPath expression to the source data and adds the value into the context.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <ContextLoaderStep assemblyPath="" typeName="BizUnit.XmlContextLoader">
+            	<XPath contextKey="HTTP_Url">/def:html/def:body/def:p[2]/def:form</XPath>
+            	<XPath contextKey="ActionID">/def:html/def:body/def:p[2]/def:form/def:input[3]</XPath>
+            	<XPath contextKey="ActionType">/def:html/def:body/def:p[2]/def:form/def:input[4]</XPath>
+            	<XPath contextKey="HoldEvent">/def:html/def:body/def:p[2]/def:form/def:input[2]</XPath>
+            </ContextLoaderStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>XPath</term>
+            		<description>The XPAth expression to evaluate against the input data <para>(repeating)</para></description>
+            	</item>
+            	<item>
+            		<term>XPath/@contextKey</term>
+            		<description>The name of context key which will be used when addin the new context item<para>(repeating)</para></description>
+            	</item>
+            </list>
+            </remarks>	
+        </member>
+        <member name="M:BizUnit.XmlContextLoader.ExecuteContextLoader(System.IO.Stream,System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            IContextLoaderStep.ExecuteContextLoader() implementation
+            </summary>
+            <param name="data">The data which the values are read from.</param>
+            <param name="contextConfig">The configuration for the context loader test step.</param>
+            <param name="context">The context object into which the values will be written.</param>
+        </member>
+        <member name="T:BizUnit.Pop3.Pop3Parse">
+            <summary>
+            Summary description for Pop3ParseMessage.
+            </summary>
+        </member>
+        <member name="T:BizUnit.Pop3.Pop3Credential">
+            <summary>
+            Summary description for Credentials.
+            </summary>
+        </member>
+        <member name="T:BizUnit.DatabaseRowCountStep">
+            <summary>
+            The DatabaseRowCountStep step uses the supplied connection string, table name and condition to determine the number of rows in the database
+            and validates this against the exepcted rows.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.DatabaseRowCountStep">
+            	<ConnectionString>Server=localhost;Database=database;Trusted_Connection=True;</ConnectionString>
+            	<Table>table</Table>
+            	<Condition>id=1</Condition>
+            	<ExpectedRows>100</ExpectedRows>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>ConnectionString</term>
+            		<description>Database connection string</description>
+            	</item>
+            	<item>
+            		<term>Table</term>
+            		<description>Table name select rows from</description>
+            	</item>
+            	<item>
+            		<term>Condition</term>
+            		<description>Condition to use</description>
+            	</item>
+            	<item>
+            		<term>ExpectedRows</term>
+            		<description>The number of expected rows</description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.DatabaseRowCountStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.HttpHelper">
+            <summary>
+            Helper class for HTTP
+            </summary>
+        </member>
+        <member name="M:BizUnit.HttpHelper.SendRequestData(System.String,System.Byte[],System.Int32,BizUnit.Context)">
+            <summary>
+            Helper method to execute an HTTP request-response
+            </summary>
+            
+            <param name="url">The HTTP Url</param>
+            <param name="payload">Byte array conatining the request data</param>
+            <param name="requestTimeout">The request timeout value</param>
+            <param name="context">The BizUnit context object which holds state and is passed between test steps</param>
+            <returns>response MemoryStream</returns>
+        </member>
+        <member name="T:BizUnit.DotNetObjectInvokerStep">
+            <summary>
+            The DotNetObjectInvokerStep is used to invoke a method on a .Net component with the ability to handle 
+            input and output parameters.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.DotNetObjectInvokerStep">
+            	<TypeName>Microsoft.Samples.BizTalk.WoodgroveBank.ServiceLevelTracking.ServiceLevelTracking, Microsoft.Samples.BizTalk.WoodgroveBank.ServiceLevelTracking, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a1054514fc67bded</TypeName>	
+            	<AssemblyPath></AssemblyPath>
+            	<MethodToInvoke>TestEndRequest3</MethodToInvoke>
+            	<Parameter><string>fooBar</string></Parameter>
+            	<Parameter><int>123</int></Parameter>
+            	<ReturnParameter><int>barfoo</int></ReturnParameter>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>TypeName</term>
+            		<description>The name of the type of the .Net object to invoke the method on. Note, if the type is GAC'd then the assembly name, version, public key etc need to be specified</description>
+            	</item>
+            	<item>
+            		<term>AssemblyPath</term>
+            		<description>The path to the assembly <para>(optional)</para></description>
+            	</item>
+            	<item>
+            		<term>MethodToInvoke</term>
+            		<description>The name of the method to invoke</description>
+            	</item>
+            	<item>
+            		<term>Parameter</term>
+            		<description>The value for the parameter to pass into the method. Note: the format should be the serialised .Net type, 
+                    if the value is taken form the context, the value in the context should also be a serialized .Net type.<para>(optional | multiple)</para></description>
+            	</item>
+            	<item>
+            		<term>ReturnParameter</term>
+            		<description>The value returned from the method <para>(optional)</para></description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.DotNetObjectInvokerStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.XmlValidationStep">
+            <summary>
+            The XmlValidationStep validates an Xml document, it may validate against a given schema, and also evaluate XPath queries.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <ValidationStep assemblyPath="" typeName="BizUnit.XmlValidationStep">
+            	<XmlSchemaPath>.\TestData\PurchaseOrder.xsd</XmlSchemaPath>
+            	<XmlSchemaNameSpace>urn:bookstore-schema</XmlSchemaNameSpace>
+            	<XPathList>
+            		<XPathValidation query="/*[local-name()='PurchaseOrder' and namespace-uri()='http://SendMail.PurchaseOrder']/*[local-name()='PONumber' and namespace-uri()='']">PONumber_0</XPathValidation>
+            	</XPathList>
+            </ValidationStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>XmlSchemaPath</term>
+            		<description>The XSD schema to use to validate the XML data <para>(optional)</para></description>
+            	</item>
+            	<item>
+            		<term>XmlSchemaNameSpace</term>
+            		<description>The XSD schema namespace to validate the XML data against <para>(optional)</para></description>
+            	</item>
+            	<item>
+            		<term>XPathList/XPathValidation</term>
+            		<description>XPath expression to evaluate against the XML document is defined in the attribute query, the expected result is defined in the element <para>(optional)(repeating)</para></description>
+            	</item>
+            	<item>
+            		<term>XPathList/XPathValidation/@query</term>
+            		<description>XPath expression to evaluate against the XML document is defined in the attribute query, the expected result is defined in the element <para>(optional)(repeating)</para></description>
+            	</item>
+            </list>
+            </remarks>	
+        </member>
+        <member name="M:BizUnit.XmlValidationStep.ExecuteValidation(System.IO.Stream,System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            IValidationStep.ExecuteValidation() implementation
+            </summary>
+            <param name='data'>The stream cintaining the data to be validated.</param>
+            <param name='validatorConfig'>The Xml fragment containing the configuration for the test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.StreamHelper">
+            <summary>
+            Helper class for stream opperations
+            </summary>
+        </member>
+        <member name="M:BizUnit.StreamHelper.CompareStreams(System.IO.Stream,System.IO.Stream)">
+            <summary>
+            Performs a binary comparison between two streams
+            </summary>
+            <param name="s1">The 1st stream to compare aginst the 2nd</param>
+            <param name="s2">The 2nd stream to compare aginst the 1st</param>
+        </member>
+        <member name="M:BizUnit.StreamHelper.LoadFileToStream(System.String,System.Double)">
+            <summary>
+            Helper method to load a disc FILE into a MemoryStream
+            </summary>
+            <param name="filePath">The path to the FILE containing the data</param>
+            <param name="timeout">The timeout afterwhich if the FILE is not found the method will fail</param>
+            <returns>MemoryStream containing the data in the FILE</returns>
+        </member>
+        <member name="M:BizUnit.StreamHelper.LoadFileToStream(System.String)">
+            <summary>
+            Helper method to load a disc FILE into a MemoryStream
+            </summary>
+            <param name="filePath">The path to the FILE containing the data</param>
+            <returns>MemoryStream containing the data in the FILE</returns>
+        </member>
+        <member name="M:BizUnit.StreamHelper.WriteStreamToConsole(System.String,System.IO.MemoryStream,BizUnit.Context)">
+            <summary>
+            Helper method to write the data in a stream to the console
+            </summary>
+            <param name="description">The description text that will be written before the stream data</param>
+            <param name="ms">Stream containing the data to write</param>
+            <param name="context">The BizUnit context object which holds state and is passed between test steps</param>
+        </member>
+        <member name="M:BizUnit.StreamHelper.LoadMemoryStream(System.IO.Stream)">
+            <summary>
+            Helper method to load a forward only stream into a seekable MemoryStream
+            </summary>
+            <param name="s">The forward only stream to read the data from</param>
+            <returns>MemoryStream containg the data as read from s</returns>
+        </member>
+        <member name="M:BizUnit.StreamHelper.LoadMemoryStream(System.String)">
+            <summary>
+            Helper method to load a string into a MemoryStream
+            </summary>
+            <param name="s">The string containing the data that will be loaded into the stream</param>
+            <returns>MemoryStream containg the data read from the string</returns>
+        </member>
+        <member name="M:BizUnit.StreamHelper.CompareXmlDocs(System.IO.Stream,System.IO.Stream,BizUnit.Context)">
+            <summary>
+            Helper method to compare two Xml documents from streams
+            </summary>
+            <param name="s1">Stream containing the 1st Xml document</param>
+            <param name="s2">Stream containing the 2nd Xml document</param>
+            <param name="context">The BizUnit context object which holds state and is passed between test steps</param>
+        </member>
+        <member name="M:BizUnit.StreamHelper.EncodeStream(System.IO.Stream,System.Text.Encoding)">
+            <summary>
+            Helper method to encode a stream
+            </summary>
+            <param name="rawData">Stream containing data to be encoded</param>
+            <param name="encoding">The encoding to be used for the data</param>
+            <returns>Encoded MemoryStream</returns>
+        </member>
+        <member name="T:BizUnit.HttpRequestResponseStep">
+             <summary>
+             The HttpRequestResponseStep is used to post a two way HTTP request-response.
+             </summary>
+             
+             <remarks>
+             The following shows an example of the Xml representation of this test step.
+             
+             <code escaped="true">
+            	<TestStep assemblyPath="" typeName="BizUnit.HttpRequestResponseStep">
+            		<SourcePath>.\TestData\InDoc1.xml</SourcePath>
+            		<DestinationUrl>http://localhost/TestFrameworkDemo/BTSHTTPReceive.dll?ReqResp</DestinationUrl>
+            		<RequestTimeout>10000</RequestTimeout>
+            
+            		<ValidationStep assemblyPath="" typeName="BizUnit.XmlValidationStep">
+            			<XmlSchemaPath>.\TestData\PurchaseOrder.xsd</XmlSchemaPath>
+            			<XmlSchemaNameSpace>http://SendMail.PurchaseOrder</XmlSchemaNameSpace>
+            			<XPathList>
+            				<XPathValidation query="/*[local-name()='PurchaseOrder' and namespace-uri()='http://SendMail.PurchaseOrder']/*[local-name()='PONumber' and namespace-uri()='']">PONumber_0</XPathValidation>
+            			</XPathList>
+            		</ValidationStep>			
+            	</TestStep>
+            	</code>
+            	
+            	<list type="table">
+            		<listheader>
+            			<term>Tag</term>
+            			<description>Description</description>
+            		</listheader>
+            		<item>
+            			<term>SourcePath</term>
+            			<description>The location of the data to be posted over HTTP</description>
+            		</item>
+            		<item>
+            			<term>DestinationUrl</term>
+            			<description>The Url which the data will be posted to</description>
+            		</item>
+            		<item>
+            			<term>RequestTimeout</term>
+            			<description>The length of time to wait to the HTTP return code</description>
+            		</item>
+            		<item>
+            			<term>ValidationStep</term>
+            			<description>Determines which validation test step to use, the HTTP response will be validated using this step<para>(Optional)</para></description>
+            		</item>
+            	</list>
+            	</remarks>
+        </member>
+        <member name="M:BizUnit.HttpRequestResponseStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.Pop3.Pop3Statics">
+            <summary>
+            Summary description for Pop3Statics.
+            </summary>
+        </member>
+        <member name="T:BizUnit.DatabaseHelper">
+            <summary>
+            Static Helper for executing SQL statements
+            </summary>
+        </member>
+        <member name="M:BizUnit.DatabaseHelper.#ctor">
+            <summary>
+            Constructor for class, default constructor is private to prevent instances being
+            created as the class only has static methods
+            </summary>
+        </member>
+        <member name="M:BizUnit.DatabaseHelper.ExecuteSqlCommand(System.String,System.String)">
+            <summary>
+            Excecutes the SQL statement against the database and returns a DataSet with the results
+            </summary>
+            <param name="connectionString">Database connection string</param>
+            <param name="sqlCommand">SQL statement to execute</param>
+            <returns>DataSet with the results of the executed command</returns>
+        </member>
+        <member name="M:BizUnit.DatabaseHelper.ExecuteScalar(System.String,System.String)">
+            <summary>
+            Executes the SQL statement and returns the first column of the first row in the resultset returned by the query.
+            </summary>
+            <param name="connectionString">Database connection string</param>
+            <param name="sqlCommand">SQL statement to execute</param>
+            <returns>The contents of the first column of the first row in the resultset</returns>
+        </member>
+        <member name="M:BizUnit.DatabaseHelper.ExecuteNonQuery(System.String,System.String)">
+            <summary>
+            Executes the SQL statement
+            </summary>
+            <param name="connectionString">Database connection string</param>
+            <param name="sqlCommand">SQL statement to execute</param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:BizUnit.DatabaseHelper.ExecuteODBCNonQuery(System.String,System.String)" -->
+        <!-- Badly formed XML comment ignored for member "M:BizUnit.DatabaseHelper.ExecuteScalarODBCQuery(System.String,System.String)" -->
+        <member name="T:BizUnit.MSMQQueuePurgeStep">
+            <summary>
+            The MSMQQueuePurgeStep purges an MSMQ queue
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.MSMQQueuePurgeStep">
+            	<QueuePath>.\Private$\Test01</QueuePath>
+            	<QueuePath>.\Private$\Test02</QueuePath>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>QueuePath</term>
+            		<description>The MSMQ queue to purge, multiple entries maybe specified</description>
+            	</item>
+            </list>
+            </remarks>	
+        </member>
+        <member name="M:BizUnit.MSMQQueuePurgeStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.HttpPostStep">
+            <summary>
+            The HttpPostStep is used to post a one way HTTP request.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.HttpPostStep">
+            	<SourcePath>.\TestData\InDoc1.xml</SourcePath>	
+            	<DestinationUrl takeFromCtx="HTTPDest">http://localhost/TestFrameworkDemo/BTSHTTPReceive.dll</DestinationUrl>
+            	<RequestTimeout>60000</RequestTimeout>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>SourcePath</term>
+            		<description>The location of the data to be posted over HTTP</description>
+            	</item>
+            	<item>
+            		<term>DestinationUrl</term>
+            		<description>The Url which the data will be posted to</description>
+            	</item>
+            	<item>
+            		<term>RequestTimeout</term>
+            		<description>The length of time to wait to the HTTP return code</description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.HttpPostStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.FileCreateStep">
+            <summary>
+            The FileCreateStep creates a new FILE in the specified directory.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.FileCreateStep">
+            	<SourcePath>.\TestData\InDoc1.xml</SourcePath>
+            	<CreationPath>.\Rec_01\InDoc1.xml</CreationPath>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>SourcePath</term>
+            		<description>The location of the input FILE to be copied to the CreationPath</description>
+            	</item>
+            	<item>
+            		<term>CreationPath</term>
+            		<description>The location of the destination FILE</description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.FileCreateStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.EventLogCheckStep">
+            <summary>
+            The EventLogCheckStep test step looks for an event log entry. Note: this test step only looks for the event log entry during the time period of the test case.
+            </summary>
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.EventLogCheckStep">
+            	<DelayBeforeCheck>0</DelayBeforeCheck> <!-- Optional, seconds to delay performing check -->
+            	<Machine>UKBTSTEST01</Machine>
+            	<EventLog>Application</EventLog>
+            	<Source>BizTalk Governor</Source>
+            	<Type>Error</Type>
+            	<EventId>10002</EventId>
+            	<ValidationRegex>The BizTalk Governor disabled the receive location: GovernorIn</ValidationRegex>
+            	<FailIfFound>False</FailIfFound>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>DelayBeforeCheck</term>
+            		<description>The time to wait before checking the event log (seconds)</description>
+            	</item>
+            	<item>
+            		<term>Machine</term>
+            		<description>The name of the machine where the event log should be checked, (optional, defaults to local machine)</description>
+            	</item>
+            	<item>
+            		<term>EventLog</term>
+            		<description>The event log to check, e.g. Application, System etc.</description>
+            	</item>
+            	<item>
+            		<term>Source</term>
+            		<description>The event log source, e.g. BizTalk Server 2004</description>
+            	</item>
+            	<item>
+            		<term>Type</term>
+            		<description>The type of the event log entry, e.g. Error, Warning, Info.</description>
+            	</item>
+            	<item>
+            		<term>EventId</term>
+            		<description>The ID of the event to look for <para>(optional)</para></description>
+            	</item>
+            	<item>
+            		<term>ValidationRegex</term>
+            		<description>Regular expression used to check the event message.</description>
+            	</item>
+            	<item>
+            		<term>FailIfFound</term>
+            		<description>Flag to indicate whether the test step should fail if the event log entry is not present.</description>
+            	</item>
+            </list>
+            </remarks>	
+        </member>
+        <member name="M:BizUnit.EventLogCheckStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.DBExecuteNonQueryStep">
+             <summary>
+             The DBExecuteNonQueryStep executes a non-query SQL statement. The number of rows affected is asserted if the 
+             NumberOfRowsAffected element is specified
+             </summary>
+             
+             <remarks>
+             The following shows an example of the Xml representation of this test step.
+             
+             <code escaped="true">
+            	<TestStep assemblyPath="" typeName="BizUnit.DBExecuteNonQueryStep">
+            		<DelayBeforeExecution>1</DelayBeforeExecution>
+            		<ConnectionString>Persist Security Info=False;Integrated Security=SSPI;database=BAMPrimaryImport;server=(local);Connect Timeout=30</ConnectionString>
+            		<NumberOfRowsAffected></NumberOfRowsAffected>
+            
+            		<!-- 
+            		The SQL Query to execute is built by formatting the RawSQLQuery substituting in the 
+            		SQLQueryParam's
+            		-->
+            		<SQLQuery>
+            			<RawSQLQuery>INSERT INTO TABLE (COLUMN1, COLUMN2) VALUES (VALUE1, {0},{1} )</RawSQLQuery>
+            			<SQLQueryParams>
+            				<SQLQueryParam takeFromCtx="Key1"></SQLQueryParam>
+            				<SQLQueryParam takeFromCtx="Key2"></SQLQueryParam>
+            			</SQLQueryParams>
+            		</SQLQuery>
+            	</TestStep>
+            	</code>
+            	
+            	<list type="table">
+            		<listheader>
+            			<term>Tag</term>
+            			<description>Description</description>
+            		</listheader>
+            		<item>
+            			<term>DelayBeforeExecution</term>
+            			<description>The number of seconds to wait before executing the step</description>
+            		</item>
+            		<item>
+            			<term>ConnectionString</term>
+            			<description>The connection string used for the DB query</description>
+            		</item>
+            		<item>
+            			<term>NumberOfRowsAffected</term>
+            			<description>The number of rows affected. This is an optional element. If specified, it causes the test step to raise an exception when the number of rows affected
+            						by executing the non-query does not match the specified value</description>
+            		</item>
+            		<item>
+            			<term>SQLQuery/RawSQLQuery</term>
+            			<description>The raw SQL string that will be formatted by substituting in the SQLQueryParam</description>
+            		</item>
+            		<item>
+            			<term>SQLQuery/SQLQueryParams/SQLQueryParam</term>
+            			<description>The parameters to substitute into RawSQLQuery <para>(repeating)</para></description>
+            		</item>
+            	</list>
+            	</remarks>	
+        </member>
+        <member name="M:BizUnit.DBExecuteNonQueryStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.BizUnit">
+             <summary>
+             BizUnit test framework for the rapid development of automated test cases.
+             </summary>
+             
+             <remarks>
+             The following example demonstrates how to create and call BizUnit:
+             
+             <code escaped="true">
+             namespace WoodgroveBank.BVTs
+            	{
+                 using System;
+                 using NUnit.Framework;
+                 using BizUnit;
+            
+                 // This is an example of calling BizUnit from NUnit...
+                 [TestFixture]
+                 public class SmokeTests
+                 {
+                     [Test]
+                     public void Test_01_Adapter_MSMQ()
+                     {
+                         BizUnit bizUnit = new BizUnit(@".\TestCases\Test_01_Adapter_MSMQ.xml");
+                         bizUnit.RunTest();
+                     }
+                 }
+             }		
+            	</code>
+            	
+            	<para>
+            	Test cases are defined with three stages:
+            	<para>1. TestSetup - used to setup the conditions ready to execute the test</para>
+            	<para>2. TestExecution - the main execution stage of the test</para>
+            	<para>3: TestCleanup - the final stage is always executed regardless of whether the test passes 
+            	or fails in order to leave the system in the state prior to executing the test</para>
+            	</para>
+            	
+            	<para>
+            	The following illustrates the structure of a test case:
+             <code escaped="true">
+            	<TestCase testName="FILE_Test_01">
+            	
+            		<TestSetup>
+            			<TestStep assemblyPath="" typeName="BizUnit.ExecuteCommandStep">
+                         ...
+            			</TestStep>
+            		</TestSetup>
+            		
+            		<TestExecution>
+            			<TestStep assemblyPath="" typeName="BizUnit.HttpRequestResponseStep" runConcurrently="true">
+                         ...
+            			</TestStep>
+            				
+            			<TestStep assemblyPath="" typeName="BizUnit.FileValidateStep">
+                         ...
+            			</TestStep>
+            					
+            		</TestExecution>
+            		
+            		<!-- Test cleanup: test cases should always leave the system in the state they found it -->
+            		<TestCleanup>
+            			<TestStep assemblyPath="" typeName="BizUnit.FileDeleteStep">
+                         ...
+            			</TestStep>
+            		</TestCleanup>	
+            	
+            	</TestCase>
+            	</code>
+            	
+            	<list type="table">
+            		<listheader>
+            			<term>Tag</term>
+            			<description>Description</description>
+            		</listheader>
+            		<item>
+            			<term>TestCase/testName</term>
+            			<description>The name of the test case being executed</description>
+            		</item>
+            		<item>
+            			<term>TestSetup</term>
+            			<description>The setup stage of the test case, containing zero or more test steps</description>
+            		</item>
+            		<item>
+            			<term>TestExecution</term>
+            			<description>The execution stage of the test case, containing zero or more test steps</description>
+            		</item>
+            		<item>
+            			<term>TestExecution/runConcurrently</term>
+            			<description>If runConcurrently is set to true the test step will be executed concurrently, meaning that 
+            			subsequent test steps will be started immediately after this test step has started. BizUnit will 
+            			wait for all of the outstanding test steps executing in concurrent mode before running the TestCleanup 
+            			stage.</description>
+            		</item>
+            		<item>
+            			<term>TestCleanup</term>
+            			<description>The clenaup stage should return the system to the state prior to executing the test, for
+            			example, if messages were written to various MSMQ queue's, the TestCleanup stage should ensure that
+            			all of those queues are empty.</description>
+            		</item>
+            	</list>
+            	</para>
+             <para>
+             Wild cards contained in configuration will be replaced if the test steps extract the configuration using the 
+             context helper class.
+             E.g. For the test step configuration below:
+             <code escaped="true">
+             <TestStep assemblyPath="" typeName="BizUnit.FileCreateStep">
+                 <SourcePath>..\..\..\TestData\InDoc1.xml</SourcePath>
+                 <CreationPath>..\..\..\Rec_03\TransactionId_%Guid%_%ServerName%.xml</CreationPath>
+            	</TestStep>
+             </code>
+             CreationPath becomes "..\..\..\Rec_03\TransactionId_12345678-D6AB-4aa9-A772-938972E3FD51_ZEUS001.xml"
+             </para>
+             </remarks>
+        </member>
+        <member name="M:BizUnit.BizUnit.#ctor(System.String)">
+             <summary>
+             BizUnit constructor.
+             </summary>
+             <param name="configFile">The path of the test case file, maybe a relavtive path.</param>
+             
+             <remarks>
+             The following example demonstrates how to create and call BizUnit:
+             
+             <code escaped="true">
+            	namespace WoodgroveBank.BVTs
+            	{
+            	using System;
+            	using NUnit.Framework;
+            	using BizUnit;
+            
+             // This is an example of calling BizUnit from NUnit...
+            	[TestFixture]
+            	public class SmokeTests
+            	{
+            		[Test]
+            		public void Test_01_Adapter_MSMQ()
+            		{
+            			BizUnit bizUnit = new BizUnit(@".\TestCases\Test_01_Adapter_MSMQ.xml");
+            			bizUnit.RunTest();
+            		}
+            	}		
+            	</code>
+            	
+            	</remarks>
+        </member>
+        <member name="M:BizUnit.BizUnit.#ctor(System.String,BizUnit.Context)">
+             <summary>
+             BizUnit constructor.
+             </summary>
+             <param name="configFile">The path of the test case file, maybe a relavtive path.</param>
+             <param name="ctx">The BizUnit context object may be flowed from an previous test case.</param>
+             
+             <remarks>
+             The following example demonstrates how to create and call BizUnit:
+             
+             <code escaped="true">
+            	namespace WoodgroveBank.BVTs
+            	{
+            	using System;
+            	using NUnit.Framework;
+            	using BizUnit;
+            
+             // This is an example of calling BizUnit from NUnit...
+            	[TestFixture]
+            	public class SmokeTests
+            	{
+                 Context ctx;
+             
+            		[Test]
+            		public void Test_02_Adapter_MSMQ()
+            		{
+            			BizUnit bizUnit = new BizUnit(@".\TestCases\Test_01_Adapter_MSMQ.xml", this.ctx);
+            			bizUnit.RunTest();
+            		}
+            	}		
+            	</code>
+            	
+            	</remarks>
+        </member>
+        <member name="M:BizUnit.BizUnit.#ctor(System.IO.Stream)">
+             <summary>
+             BizUnit constructor.
+             </summary>
+             <param name="configStream">The path of the test case file, maybe a relavtive path.</param>
+             
+             <remarks>
+             The following example demonstrates how to create and call BizUnit:
+             
+             <code escaped="true">
+            	namespace WoodgroveBank.BVTs
+            	{
+            	using System;
+            	using NUnit.Framework;
+            	using BizUnit;
+            
+             // This is an example of calling BizUnit from NUnit...
+            	[TestFixture]
+            	public class SmokeTests
+            	{
+            		[Test]
+            		public void Test_03_Adapter_MSMQ()
+            		{
+                     // The test case is an embeded resource...
+            			BizUnit bizUnit = new BizUnit(Assembly.GetExecutingAssembly().GetManifestResourceStream("BizUnit.SampleTests.BizUnitFunctionalTests.Test_04_MQSeriesTest.xml"));
+            			bizUnit.RunTest();
+            		}
+            	}		
+            	</code>
+            	
+            	</remarks>
+        </member>
+        <member name="M:BizUnit.BizUnit.#ctor(System.IO.Stream,BizUnit.Context)">
+             <summary>
+             BizUnit constructor.
+             </summary>
+             <param name="configStream">The path of the test case file, maybe a relavtive path.</param>
+             <param name="ctx">The BizUnit context object may be flowed from an previous test case.</param>
+             
+             <remarks>
+             The following example demonstrates how to create and call BizUnit:
+             
+             <code escaped="true">
+            	namespace WoodgroveBank.BVTs
+            	{
+            	using System;
+            	using NUnit.Framework;
+            	using BizUnit;
+            
+             // This is an example of calling BizUnit from NUnit...
+            	[TestFixture]
+            	public class SmokeTests
+            	{
+                 Context ctx;
+             
+            		[Test]
+            		public void Test_04_Adapter_MSMQ()
+            		{
+                     // The test case is an embeded resource...
+            			BizUnit bizUnit = new BizUnit(Assembly.GetExecutingAssembly().GetManifestResourceStream("BizUnit.SampleTests.BizUnitFunctionalTests.Test_04_MQSeriesTest.xml"), this.ctx);
+            			bizUnit.RunTest();
+            		}
+            	}		
+            	</code>
+            	
+            	</remarks>
+        </member>
+        <member name="M:BizUnit.BizUnit.#ctor(System.String,BizUnit.BizUnit.TestGroupPhase)">
+             <summary>
+             BizUnit constructor for the setup and teardown of a test group.
+             </summary>
+             <param name="configFile">The path of the test case file, maybe a relavtive path.</param>
+             <param name="testGroupPhase">The test group phase (TestGroupPhase.TestGroupSetup|TestGroupPhase.TestGroupTearDown). This 
+             constructor is used during the initialization or termination of a group of test cases, for example when using the NUnit attributes: [TestFixtureSetUp] or [TestFixtureTearDown].</param>
+             
+             <remarks>
+             The following example demonstrates how to create and call BizUnit:
+             
+             <code escaped="true">
+            	namespace WoodgroveBank.BVTs
+            	{
+            	using System;
+            	using NUnit.Framework;
+            	using BizUnit;
+            
+             // This is an example of calling BizUnit from NUnit...
+            	[TestFixture]
+            	public class SmokeTests
+            	{
+            		[TestFixtureSetUp]
+            		public void Test_Group_Setup()
+            		{
+            			BizUnit bizUnit = new BizUnit(@".\TestCases\Test_Group_Setup.xml", BizUnit.TestGroupPhase.TestGroupSetup);
+            			bizUnit.RunTest();
+            		}
+            		
+            		...
+            		
+            	}		
+            	</code>
+            	
+            	</remarks>
+        </member>
+        <member name="M:BizUnit.BizUnit.#ctor(System.String,BizUnit.BizUnit.TestGroupPhase,BizUnit.Context)">
+            <summary>
+            BizUnit constructor for the setup and teardown of a test group.
+            </summary>
+            <param name="configFile">The path of the test case file, maybe a relavtive path.</param>
+            <param name="testGroupPhase">The test group phase (TestGroupPhase.TestGroupSetup|TestGroupPhase.TestGroupTearDown). This 
+            constructor is used during the initialization or termination of a group of test cases, for example when using the NUnit attributes: [TestFixtureSetUp] or [TestFixtureTearDown].</param>
+            <param name="ctx">The BizUnit context object may be flowed from an previous test case.</param>
+            
+            <remarks>
+            The following example demonstrates how to create and call BizUnit:
+            
+            <code escaped="true">
+            namespace WoodgroveBank.BVTs
+            {
+            using System;
+            using NUnit.Framework;
+            using BizUnit;
+            
+            // This is an example of calling BizUnit from NUnit...
+            [TestFixture]
+            public class SmokeTests
+            {
+                Context ctx;
+            
+            	[TestFixtureSetUp]
+            	public void Test_Group_Setup()
+            	{
+            		BizUnit bizUnit = new BizUnit(@".\TestCases\Test_Group_Setup.xml", BizUnit.TestGroupPhase.TestGroupSetup, this.ctx);
+            		bizUnit.RunTest();
+            	}
+            	
+            	...
+            	
+            }		
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.BizUnit.#ctor(System.IO.Stream,BizUnit.BizUnit.TestGroupPhase)">
+             <summary>
+             BizUnit constructor for the setup and teardown of a test group.
+             </summary>
+             <param name="configStream">The path of the test case file, maybe a relavtive path.</param>
+             <param name="testGroupPhase">The test group phase (TestGroupPhase.TestGroupSetup|TestGroupPhase.TestGroupTearDown). This 
+             constructor is used during the initialization or termination of a group of test cases, for example when using the NUnit attributes: [TestFixtureSetUp] or [TestFixtureTearDown].</param>
+             
+             <remarks>
+             The following example demonstrates how to create and call BizUnit:
+             
+             <code escaped="true">
+            	namespace WoodgroveBank.BVTs
+            	{
+            	using System;
+            	using NUnit.Framework;
+            	using BizUnit;
+            
+             // This is an example of calling BizUnit from NUnit...
+            	[TestFixture]
+            	public class SmokeTests
+            	{
+            		[TestFixtureSetUp]
+            		public void Test_Group_Setup()
+            		{
+                     // The test case is an embeded resource...
+            			BizUnit bizUnit = new BizUnit(@".\TestCases\Test_Group_Setup.xml", BizUnit.TestGroupPhase.TestGroupSetup);
+            			bizUnit.RunTest();
+            		}
+            		
+            		...
+            		
+            	}		
+            	</code>
+            	
+            	</remarks>
+        </member>
+        <member name="M:BizUnit.BizUnit.#ctor(System.IO.Stream,BizUnit.BizUnit.TestGroupPhase,BizUnit.Context)">
+             <summary>
+             BizUnit constructor for the setup and teardown of a test group.
+             </summary>
+             <param name="configStream">The path of the test case file, maybe a relavtive path.</param>
+             <param name="testGroupPhase">The test group phase (TestGroupPhase.TestGroupSetup|TestGroupPhase.TestGroupTearDown). This 
+             constructor is used during the initialization or termination of a group of test cases, for example when using the NUnit attributes: [TestFixtureSetUp] or [TestFixtureTearDown].</param>
+             <param name="ctx">The BizUnit context object may be flowed from an previous test case.</param>
+             
+             <remarks>
+             The following example demonstrates how to create and call BizUnit:
+             
+             <code escaped="true">
+            	namespace WoodgroveBank.BVTs
+            	{
+            	using System;
+            	using NUnit.Framework;
+            	using BizUnit;
+            
+             // This is an example of calling BizUnit from NUnit...
+            	[TestFixture]
+            	public class SmokeTests
+            	{
+                 Context ctx;
+             
+            		[TestFixtureSetUp]
+            		public void Test_Group_Setup()
+            		{
+                     // The test case is an embeded resource...
+            			BizUnit bizUnit = new BizUnit(@".\TestCases\Test_Group_Setup.xml", BizUnit.TestGroupPhase.TestGroupSetup, ctx);
+            			bizUnit.RunTest();
+            		}
+            		
+            		...
+            		
+            	}		
+            	</code>
+            	
+            	</remarks>
+        </member>
+        <member name="M:BizUnit.BizUnit.RunTest">
+             <summary>
+             Executes a test case.
+             </summary>
+             <returns>Returns void</returns>
+             
+             <remarks>
+             The following example demonstrates how to create and call BizUnit:
+             
+             <code escaped="true">
+            	namespace WoodgroveBank.BVTs
+            	{
+            	using System;
+            	using NUnit.Framework;
+            	using BizUnit;
+            
+             // This is an example of calling BizUnit from NUnit...
+            	[TestFixture]
+            	public class SmokeTests
+            	{
+            		[Test]
+            		public void Test_01_Adapter_MSMQ()
+            		{
+            			BizUnit bizUnit = new BizUnit(@".\TestCases\Test_01_Adapter_MSMQ.xml");
+            			bizUnit.RunTest();
+            		}
+            	}		
+            	</code>
+            	
+            	</remarks>
+        </member>
+        <member name="P:BizUnit.BizUnit.Ctx">
+             <summary>
+             Gets the BizUnit context for the current test.
+             </summary>
+             
+             <remarks>
+             The following example demonstrates how to create and call BizUnit:
+             
+             <code escaped="true">
+            	namespace WoodgroveBank.BVTs
+            	{
+            	using System;
+            	using NUnit.Framework;
+            	using BizUnit;
+            
+             // This is an example of calling BizUnit from NUnit...
+            	[TestFixture]
+            	public class SmokeTests
+            	{
+                 Context ctx;
+             
+            		[TestFixtureSetUp]
+            		public void Test_Group_Setup()
+            		{
+                     // The test case is an embeded resource...
+            			BizUnit bizUnit = new BizUnit(@".\TestCases\Test_Group_Setup.xml", BizUnit.TestGroupPhase.TestGroupSetup);
+                     this.ctx = bizUnit.Ctx;
+             
+            			bizUnit.RunTest();
+            		}
+            		
+            		...
+            		
+            	}		
+            	</code>
+            	
+            	</remarks>
+        </member>
+        <member name="T:BizUnit.BizUnit.TestGroupPhase">
+            <summary>The TestGroupPhase enumeration is used to specify the setup and teardown phases of a group of test cases. For example when using the NUnit attributes: [TestFixtureSetUp] or [TestFixtureTearDown].
+            </summary>
+        </member>
+        <member name="F:BizUnit.BizUnit.TestGroupPhase.TestGroupSetup">
+            <summary>The start of the test group setup</summary>
+        </member>
+        <member name="F:BizUnit.BizUnit.TestGroupPhase.TestGroupTearDown">
+            <summary>The end of the test group setup</summary>
+        </member>
+        <member name="F:BizUnit.BizUnit.TestGroupPhase.Unknown">
+            <summary>Undefined</summary>
+        </member>
+        <member name="T:BizUnit.RenameDirectoryStep">
+            <summary>
+            The RenameDirectoryStep renames a directory, this test step is often used for negative test scenarios
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.RenameDirectoryStep">
+            	<SourceDirectory>.\Send_01</SourceDirectory>
+            	<DestinationDirectory>.\Send_01x</DestinationDirectory>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>SourceDirectory</term>
+            		<description>The current path of the directory to rename</description>
+            	</item>
+            	<item>
+            		<term>DestinationDirectory</term>
+            		<description>The new path of the directory being renamed</description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.RenameDirectoryStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.ExecuteCommandStep">
+            <summary>
+            The ExecuteCommandStep executes a program from the command line, command line arguments may be supplied also.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.ExecuteCommandStep">
+            	<ProcessName>processName</ProcessName>
+            	<ProcessParams>-a32 -bFooBar</ProcessParams>
+            	<WorkingDirectory>..\..\setup</WorkingDirectory>
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>ProcessName</term>
+            		<description>The name of the program to execute</description>
+            	</item>
+            	<item>
+            		<term>ProcessParams</term>
+            		<description>The command line paramters</description>
+            	</item>
+            	<item>
+            		<term>WorkingDirectory</term>
+            		<description>The working directory to run the program from</description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.ExecuteCommandStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.DBQueryStep">
+             <summary>
+             The DBQueryStep is used to query a SQL query against a database and validate the values for the row returned.
+             </summary>
+             
+             <remarks>
+             The following shows an example of the Xml representation of this test step.
+             
+             <code escaped="true">
+            	<TestStep assemblyPath="" typeName="BizUnit.DBQueryStep">
+            		<DelayBeforeCheck>1</DelayBeforeCheck>
+            		<ConnectionString>Persist Security Info=False;Integrated Security=SSPI;database=BAMPrimaryImport;server=(local);Connect Timeout=30</ConnectionString>
+            
+            		<!-- 
+            		The SQL Query to execute is built by formatting the RawSQLQuery substituting in the 
+            		SQLQueryParam's
+            		-->
+            		<SQLQuery>
+            			<RawSQLQuery>select * from dbo.bam_Event_Completed where EventId = {0}</RawSQLQuery>
+            			<SQLQueryParams>
+            				<SQLQueryParam takeFromCtx="EventId"></SQLQueryParam>
+            			</SQLQueryParams>
+            		</SQLQuery>
+            			
+            		<Rows>
+            			<Columns>
+            			<!-- 
+            			Note: The column names are dependant on the DB schema being checked against.
+            			Adding the attribute isUnique="true" to one of the columns allows it to be 
+            			uniquely selcted in the scenario where multiple rows are returned.
+            			-->
+            					
+            				<EventType>Switch</EventType>
+            				<EventStatus>Completed</EventStatus>
+            				<ProcessorId>JVQFFCCZ0</ProcessorId>
+            				<SchemeId>GF81300000</SchemeId>
+            				<EventFailed>null</EventFailed>
+            				<EventHeld>null</EventHeld>
+            				<EventHoldNotifRec>null</EventHoldNotifRec>
+            			</Columns>
+            		</Rows>	
+            	</TestStep>
+            	</code>
+            	
+            	The ContextManipulator builds a new context item by appeanding the values of multiple context items
+            	<list type="table">
+            		<listheader>
+            			<term>Tag</term>
+            			<description>Description</description>
+            		</listheader>
+            		<item>
+            			<term>DelayBeforeCheck</term>
+            			<description>The number of seconds to wait before executing the step</description>
+            		</item>
+            		<item>
+            			<term>ConnectionString</term>
+            			<description>The connection string used for the DB query</description>
+            		</item>
+            		<item>
+            			<term>SQLQuery/RawSQLQuery</term>
+            			<description>The raw SQL string that will be formatted by substituting in the SQLQueryParam</description>
+            		</item>
+            		<item>
+            			<term>SQLQuery/SQLQueryParams/SQLQueryParam</term>
+            			<description>The parameters to substitute into RawSQLQuery <para>(repeating)</para></description>
+            		</item>
+            		<item>
+            			<term>Rows/Columns</term>
+            			<description>One or more columns which represent the expected query result</description>
+            		</item>
+            	</list>
+            	</remarks>
+        </member>
+        <member name="M:BizUnit.DBQueryStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.ContextManipulatorStep">
+            <summary>
+            The ContextManipulator is used to manipulate BizUnit context fields. 
+            It maybe used to create a new field from one or more existing fields.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.ContextManipulatorStep">
+            	<ContextItem contextKey="NewItemToWrite">
+            		<ItemTest>holdEvent=</ItemTest>
+            		<ItemTest takeFromCtx="HoldEvent"></ItemTest>
+            		<ItemTest>actionId=</ItemTest>
+            		<ItemTest takeFromCtx="ActionId"></ItemTest>
+            		<ItemTest>actionType=</ItemTest>
+            		<ItemTest takeFromCtx="ActionType"></ItemTest>
+            	</ContextItem>
+            </TestStep>
+            </code>
+            
+            The ContextManipulator builds a new context item by appeanding the values of multiple context items
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>ContextItem</term>
+            		<description>The key for the new context value that will be constructed</description>
+            	</item>
+            	<item>
+            		<term>ItemTest</term>
+            		<description>The item to append, note that a value from the context maybe used if the attribute takeFromCtx is used <para>(one or more)</para></description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.ContextManipulatorStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.BinaryValidationStep">
+            <summary>
+            The BinaryValidationStep performs a binary validation of the data supplied.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <ValidationStep assemblyPath="" typeName="BizUnit.BinaryValidationStep">
+            	<ComparisonDataPath>.\TestData\ResultDoc1.xml</ComparisonDataPath>
+            	<CompareAsUTF8>true</CompareAsUTF8>
+            </ValidationStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>ComparisonDataPath</term>
+            		<description>The path of the data to compare against.</description>
+            	</item>
+            	<item>
+            		<term>CompareAsUTF8</term>
+            		<description>true if both ComparisonDataPath and the data are to be compared to UTF8 before comparing (optional)(default=false)</description>
+            	</item>
+            </list>
+            </remarks>	
+        </member>
+        <member name="M:BizUnit.BinaryValidationStep.ExecuteValidation(System.IO.Stream,System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            IValidationStep.ExecuteValidation() implementation
+            </summary>
+            <param name='data'>The stream cintaining the data to be validated.</param>
+            <param name='validatorConfig'>The Xml fragment containing the configuration for the test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.FileValidateStep">
+            <summary>
+            The FileValidateStep reads a FILE from a given locaton and validates the contents.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <TestStep assemblyPath="" typeName="BizUnit.FileValidateStep">
+            	<Timeout>2000</Timeout>
+            	<Directory>C:\Recv2\</Directory>
+            	<SearchPattern>TransactionId_*.xml</SearchPattern>
+            	<DeleteFile>true</DeleteFile>
+            		
+            	<!-- Note: ContextLoader Step could be any generic validation step -->	
+            	<ContextLoaderStep assemblyPath="" typeName="BizUnit.RegExContextLoader">
+            		<RegEx contextKey="HTTP_Url">/def:html/def:body/def:p[2]/def:form</RegEx>
+            		<RegEx contextKey="ActionID">/def:html/def:body/def:p[2]/def:form/def:input[3]</RegEx>
+            		<RegEx contextKey="ActionType">/def:html/def:body/def:p[2]/def:form/def:input[4]</RegEx>
+            		<RegEx contextKey="HoldEvent">/def:html/def:body/def:p[2]/def:form/def:input[2]</RegEx>
+            	</ContextLoaderStep>
+            
+            	<!-- Note: Validation step could be any generic validation step -->	
+            	<ValidationStep assemblyPath="" typeName="BizUnit.XmlValidationStep">
+            		<XmlSchemaPath>.\TestData\PurchaseOrder.xsd</XmlSchemaPath>
+            		<XmlSchemaNameSpace>http://SendMail.PurchaseOrder</XmlSchemaNameSpace>
+            		<XPathList>
+            			<XPathValidation query="/*[local-name()='PurchaseOrder' and namespace-uri()='http://SendMail.PurchaseOrder']/*[local-name()='PONumber' and namespace-uri()='']">PONumber_0</XPathValidation>
+            		</XPathList>
+            	</ValidationStep>			
+            </TestStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>Timeout</term>
+            		<description>Timeout to wait for the FILE to be written, in milisecs</description>
+            	</item>
+            	<item>
+            		<term>Directory</term>
+            		<description>The directory where the FILE is located</description>
+            	</item>
+            	<item>
+            		<term>SearchPattern</term>
+            		<description>The search pattern, such as "*.txt"</description>
+            	</item>
+            	<item>
+            		<term>DeleteFile</term>
+            		<description>true if the file should be deleted, false if it should not</description>
+            	</item>
+            	<item>
+            		<term>ContextLoaderStep</term>
+            		<description>The configuration for the context loader step used to load data into the BizUnit context which may be used by subsequent test steps<para>(optional)</para></description>
+            	</item>
+            	<item>
+            		<term>ValidationStep</term>
+            		<description>The configuration for the validation step used to validate the contents of the file, the validation step should implement IValidationTestStep<para>(optional)</para></description>
+            	</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:BizUnit.FileValidateStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.Context">
+            <summary>
+            Represents a state object that is passed between BizUnit test steps.
+            </summary>
+            
+            <remarks>
+            The context is passed by BizUnit to each individual test step, state maybe written to or read from the context, note the following
+            wild cards are supported: %DateTime%, %ServerName% and %Guid%.
+            The context also provides helper methods for test steps to read their configuration, and to log information, warnings, errors 
+            and data in a consistent manner.
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.#ctor">
+            <summary>
+            Default Context constructor.
+            </summary>
+            
+            <remarks>
+            This may be used for scenarios where by the context object needs 
+            to be created and passed to BizUnit.
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.#ctor(BizUnit.ILogWritter)">
+            <summary>
+            Context constructor.
+            </summary>
+            <param name="logWritter">Custom implementation of ILogWritter, used 
+            to redirect the BizUnit test output.</param>
+            
+            <remarks>
+            This may be used for scenarios where by the context object needs 
+            to be created and passed to BizUnit, and a custom log writter is 
+            requred to direct the BizUnit output to a custom sink, to do this 
+            the ILogWritter interface should be implemented.
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.Add(System.String,System.Object)">
+            <summary>
+            Adds a new object to the context.
+            </summary>
+            <param name="key">The name of the key for the object added.</param>
+            <param name="newValue">The object to be added to the context.</param>
+            
+            <remarks>
+            The following example demonstrates how to add a new item to the context:
+            
+            <code escaped="true">
+            context.Add("FILE_NAME", fileName);
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.Add(System.String,System.Object,System.Boolean)">
+            <summary>
+            Adds a new object to the context.
+            </summary>
+            <param name="key">The name of the key for the object added.</param>
+            <param name="newValue">The object to be added to the context.</param>
+            <param name="updateIfExists">If the object already exists and this flag 
+            is set to true, its value will be updated, otherwise the method will 
+            throw an exception.</param>
+            
+            <remarks>
+            The following example demonstrates how to add a new item to the context:
+            
+            <code escaped="true">
+            context.Add("FILE_NAME", fileName);
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.GetValue(System.String)">
+            <summary>
+            Gets a string previously saved on the context.
+            </summary>
+            <param name="key">The name of the key for the object to get.</param>
+            <returns>string value</returns>
+            
+            <remarks>
+            The following example demonstrates how to get a string value from the context:
+            
+            <code escaped="true">
+            string fileName = context.GetValue("FILE_NAME");
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.GetObject(System.String)">
+            <summary>
+            Gets an object previously saved to the context .
+            </summary>
+            <param name="key">The name of the key for the object to get.</param>
+            <returns>object</returns>
+            
+            <remarks>
+            The following example demonstrates how to get an object from the context:
+            
+            <code escaped="true">
+            object fileName = context.GetObject("FILE_NAME");
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.ExecuteValidator(System.IO.Stream,System.Xml.XmlNode)">
+            <summary>
+            Executes a validation test step.
+            </summary>
+            <param name="data">The stream containing the data to validate.</param>
+            <param name="validatorConfig">The Xml configuration for the validation test step, this configuration is passed onto the validation step by BizUnit.</param>
+            
+            <remarks>
+            The following example demonstrates how to execute a validation test step:
+            
+            <code escaped="true">
+            XmlNode validationConfig = testConfig.SelectSingleNode("ValidationStep");
+            
+            ...
+            
+            MemoryStream response = HttpHelper.SendRequestData(destinationUrl, data, requestTimeout, context);
+            context.ExecuteValidator( response, validationConfig );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.ExecuteContextLoader(System.IO.Stream,System.Xml.XmlNode)">
+            <summary>
+            Executes a context loader test step.
+            </summary>
+            <param name="data">The stream containing the data to validate.</param>
+            <param name="contextConfig">The Xml configuration for the context loader 
+            test step, this configuration is passed onto the validation step by BizUnit.</param>
+            
+            <remarks>
+            Context loader steps load data onto the context. The following example demonstrates how to execute a validation test step:
+            
+            <code escaped="true">
+            XmlNode contextConfig = testConfig.SelectSingleNode("ContextConfig");
+            
+            ...
+            
+            MemoryStream response = HttpHelper.SendRequestData(destinationUrl, data, requestTimeout, context);
+            context.ExecuteContextLoader( response, contextConfig );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.ReadConfigAsObject(System.Xml.XmlNode,System.String,System.Boolean)">
+            <summary>
+            Used by a test step to read an object, if the object is in the context 
+            the object will be returned, otherwise the string value from the Xml configuration 
+            will be returned.
+            </summary>
+            <param name="config">The Xml configuration for the test step.</param>
+            <param name="xPath">The XPath expression used to query for the configuration value.</param>
+            <param name="optional">True if this is an option field. If false and the XPath expression does not find a value and exception will be thrown.</param>
+            <returns>string value</returns>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            	object fooObj = context.ReadConfigAsObject( testConfig, "Foo", true );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.ReadConfigAsObject(System.Xml.XmlNode,System.String)">
+            <summary>
+            Used by a test step to read an object, if the object is in the context 
+            the object will be returned, otherwise the string value from the Xml configuration 
+            will be returned.
+            </summary>
+            <param name="config">The Xml configuration for the test step.</param>
+            <param name="xPath">The XPath expression used to query for the configuration value.</param>
+            <returns>string value</returns>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            	object fooObj = context.ReadConfigAsObject( testConfig, "Foo" );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.ReadConfigAsXml(System.Xml.XmlNode,System.String)">
+            <summary>
+            Used by a test step to read a configuration string value as Xml from it's Xml configuration.
+            </summary>
+            <param name="config">The Xml configuration for the test step.</param>
+            <param name="xPath">The XPath expression used to query for the configuration value.</param>
+            <returns>string value</returns>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            	string directory = context.ReadConfigAsXml( testConfig, "Directory" );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.ReadConfigAsXml(System.Xml.XmlNode,System.String,System.Boolean)">
+            <summary>
+            Used by a test step to read a configuration string value as Xml from it's Xml configuration.
+            </summary>
+            <param name="config">The Xml configuration for the test step.</param>
+            <param name="xPath">The XPath expression used to query for the configuration value.</param>
+            <param name="optional">True if this is an option field. If false and the XPath expression does not find a value and exception will be thrown.</param>
+            <returns>string value</returns>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            	string directory = context.ReadConfigAsXml( testConfig, "Directory", true );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.ReadConfigAsString(System.Xml.XmlNode,System.String)">
+            <summary>
+            Used by a test step to read a configuration string value from it's Xml configuration.
+            </summary>
+            <param name="config">The Xml configuration for the test step.</param>
+            <param name="xPath">The XPath expression used to query for the configuration value.</param>
+            <returns>string value</returns>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            	string directory = context.ReadConfigAsString( testConfig, "Directory" );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.ReadConfigAsString(System.Xml.XmlNode,System.String,System.Boolean)">
+            <summary>
+            Used by a test step to read a configuration string value from it's Xml configuration.
+            </summary>
+            <param name="config">The Xml configuration for the test step.</param>
+            <param name="xPath">The XPath expression used to query for the configuration value.</param>
+            <param name="optional">True if this is an option field. If false and the XPath expression does not find a value and exception will be thrown.</param>
+            <returns>string value</returns>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            	string directory = context.ReadConfigAsString( testConfig, "Directory", true );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.ReadConfigAsInt32(System.Xml.XmlNode,System.String,System.Boolean)">
+            <summary>
+            Used by a test step to read a configuration Int32 value from it's Xml configuration.
+            </summary>
+            <param name="config">The Xml configuration for the test step.</param>
+            <param name="xPath">The XPath expression used to query for the configuration value.</param>
+            <param name="optional">True if this is an option field. If false and the XPath expression does not find a value and exception will be thrown.</param>
+            <returns>int value</returns>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            	int retryCount = context.ReadConfigAsInt32( testConfig, "RetryCount" );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.ReadConfigAsInt32(System.Xml.XmlNode,System.String)">
+            <summary>
+            Used by a test step to read a configuration Int32 value from it's Xml configuration.
+            </summary>
+            <param name="config">The Xml configuration for the test step.</param>
+            <param name="xPath">The XPath expression used to query for the configuration value.</param>
+            <returns>int value</returns>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            	int retryCount = context.ReadConfigAsInt32( testConfig, "RetryCount", true );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.ReadConfigAsDouble(System.Xml.XmlNode,System.String,System.Boolean)">
+            <summary>
+            Used by a test step to read a configuration double value from it's Xml configuration.
+            </summary>
+            <param name="config">The Xml configuration for the test step.</param>
+            <param name="xPath">The XPath expression used to query for the configuration value.</param>
+            <param name="optional">True if this is an option field. If false and the XPath expression does not find a value and exception will be thrown.</param>
+            <returns>double value</returns>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            	double timeout = context.ReadConfigAsDouble( testConfig, "Timeout" );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.ReadConfigAsDouble(System.Xml.XmlNode,System.String)">
+            <summary>
+            Used by a test step to read a configuration double value from it's Xml configuration.
+            </summary>
+            <param name="config">The Xml configuration for the test step.</param>
+            <param name="xPath">The XPath expression used to query for the configuration value.</param>
+            <returns>double value</returns>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            	double timeout = context.ReadConfigAsDouble( testConfig, "Timeout", true );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.ReadConfigAsFloat(System.Xml.XmlNode,System.String)">
+            <summary>
+            Used by a test step to read a configuration float value from it's Xml configuration.
+            </summary>
+            <param name="config">The Xml configuration for the test step.</param>
+            <param name="xPath">The XPath expression used to query for the configuration value.</param>
+            <returns>double value</returns>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            	float timeout = context.ReadConfigAsFloat( testConfig, "Timeout", true );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.ReadConfigAsBool(System.Xml.XmlNode,System.String,System.Boolean)">
+            <summary>
+            Used by a test step to read a configuration bool value from it's Xml configuration.
+            </summary>
+            <param name="config">The Xml configuration for the test step.</param>
+            <param name="xPath">The XPath expression used to query for the configuration value.</param>
+            <param name="optional">True if this is an option field. If false and the XPath expression does not find a value and exception will be thrown.</param>
+            <returns>bool value</returns>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            	bool findFirst = context.ReadConfigAsBool( testConfig, "FindFirst", true );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.ReadConfigAsBool(System.Xml.XmlNode,System.String)">
+            <summary>
+            Used by a test step to read a configuration bool value from it's Xml configuration.
+            </summary>
+            <param name="config">The Xml configuration for the test step.</param>
+            <param name="xPath">The XPath expression used to query for the configuration value.</param>
+            <returns>bool value</returns>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            	bool findFirst = context.ReadConfigAsBool( testConfig, "FindFirst", true );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.GetInnerXml(System.Xml.XmlNode)">
+            <summary>
+            Used by a test step to read the inner xml of an XmlNode, if the node has the 
+            BizUnit attribute takeFromCtx set, the value will be fetched form the BizUnit 
+            context.
+            </summary>
+            <param name="node">The XmlNode to fetch the inner xml from.</param>
+            <returns>string</returns>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+                XmlNodeList parameters = testConfig.SelectNodes("Parameter");
+                
+                ....
+                
+                foreach (XmlNode paramter in parameters)
+                {
+                   string val = context.GetInnerXml( node );
+                   ...
+                }
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.LogException(System.Exception)">
+            <summary>
+            Used by a test step to log an Exception caught by the test step, this will be logged in the test output.
+            </summary>
+            <param name="e">The Exception to be logged by BizUnit.</param>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            
+            	try
+            	{
+            		...
+            	}
+            	catch(Exception ex)
+            	{
+            		context.LogException( ex );
+            	}
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.LogData(System.String,System.String)">
+            <summary>
+            Used by a test step to log test Data, this will be logged in the test output.
+            </summary>
+            <param name="description">The description of what the data being logged is.</param>
+            <param name="data">The data to log.</param>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            
+            	...
+            	context.LogData( "HTTP Response:", data );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.LogData(System.String,System.IO.Stream)">
+            <summary>
+            Used by a test step to log test Data, this will be logged in the test output.
+            </summary>
+            <param name="description">The description of what the data being logged is.</param>
+            <param name="data">The stream containing the data to log.</param>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            
+            	...
+            	context.LogData( "HTTP Response:", data );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.LogInfo(System.String)">
+            <summary>
+            Used by a test step to log test information, this will be logged in the test output.
+            </summary>
+            <param name="text">The text to be written to the output.</param>
+            
+            <remarks>
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            
+            	...
+            	context.LogInfo( "HTTP Response was successfully received" );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.LogInfo(System.String,System.Object[])">
+            <summary>
+            Used by a test step to log test information, this will be logged in the test output.
+            </summary>
+            <param name="text">The text to be written to the output.</param>
+            <param name="args">Array of arguments to be formatted with the text.</param>
+            
+            <remarks> 
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            
+            	...
+            	context.LogInfo( "HTTP Response was successfully received by: {0}, at: {1}", clientName, DateTime.Now );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.LogWarning(System.String)">
+            <summary>
+            Used by a test step to log a test warnings, this will be logged in the test output.
+            </summary>
+            <param name="text">The text to be written to the output.</param>
+            
+            <remarks> 
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            
+            	...
+            	context.LogWarning( "The FILE was found, retrying..." );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.LogWarning(System.String,System.Object[])">
+            <summary>
+            Used by a test step to log a test warnings, this will be logged in the test output.
+            </summary>
+            <param name="text">The text to be written to the output.</param>
+            <param name="args">Array of arguments to be formatted with the text.</param>
+            
+            <remarks> 
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            
+            	...
+            	context.LogWarning( "The FILE was found, poll nummber: {0}, number of retries remaining: {1}", count, retriesLeft );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.LogError(System.String)">
+            <summary>
+            Used by a test step to log a test error, this will be logged in the test output.
+            </summary>
+            <param name="text">The text to be written to the output.</param>
+            
+            <remarks> 
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            
+            	...
+            	context.LogError( "The response data was invalid." );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.LogError(System.String,System.Object[])">
+            <summary>
+            Used by a test step to log a test error, this will be logged in the test output.
+            </summary>
+            <param name="text">The text to be written to the output.</param>
+            <param name="args">Array of arguments to be formatted with the text.</param>
+            
+            <remarks> 
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            
+            	...
+            	context.LogError( "The request failed with the folowing error: {0}", requestErrorText );
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="M:BizUnit.Context.SubstituteWildCards(System.String)">
+            <summary>
+            Used to substitute wild cards into strings.
+            </summary>
+            
+            <remarks> 
+            The following wild cards are suported:
+            
+            <code escaped="true">
+            %DateTime% - will replace the wild card with the current date time in the format HHmmss-ddMMyyyy
+            %ServerName% - will replace the wild card with the name of the server BizUnit is being executed on
+            %Guid% - will be replaced by a new Guid
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="P:BizUnit.Context.TestCaseStart">
+            <summary>
+            Used by a test step to get the time that the test case started.
+            </summary>
+            
+            <remarks> 
+            The following example demonstrates how to use the method:
+            
+            <code escaped="true">
+            public void Execute(XmlNode testConfig, Context context)
+            {
+            
+            	...
+            	DateTime testStart = context.TestCaseStart;
+            </code>
+            
+            </remarks>
+        </member>
+        <member name="T:BizUnit.ContextValidationStep">
+            <summary>
+            The ContextValidationStep validates the value of one or more context values.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <ValidationStep assemblyPath="" typeName="BizUnit.ContextValidationStep">
+            	<Context keyName="SchemeID">GF81300000</Context>
+            </ValidationStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>Context</term>
+            		<description>The attribute keyName identifies the context key to validate, while the element represents the expected result <para>(optional)(repeating)</para></description>
+            	</item>
+            	<item>
+            		<term>Context/@keyName</term>
+            		<description>The attribute keyName identifies the context key to validate, while the element represents the expected result <para>(optional)(repeating)</para></description>
+            	</item>
+            </list>
+            </remarks>	
+        </member>
+        <member name="M:BizUnit.ContextValidationStep.ExecuteValidation(System.IO.Stream,System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            IValidationStep.ExecuteValidation() implementation
+            </summary>
+            <param name='data'>The stream cintaining the data to be validated.</param>
+            <param name='validatorConfig'>The Xml fragment containing the configuration for the test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.Pop3.Pop3Message">
+            <summary>
+            DLM: Stores the From:, To:, Subject:, body and attachments
+            within an email. Binary attachments are Base64-decoded
+            </summary>
+        </member>
+        <member name="T:BizUnit.ImportDatasetToDBStep">
+            <summary>
+            ImportDatasetToDBStep imports data stored in a DataSet Xml file into the specified database. Use this step if you want to load
+            a SQL database with dummy data.  
+             </summary>
+             
+            <remarks>
+             <code escaped="true">
+             <TestStep assemblyPath="" typeName="BizUnit.ImportDatasetToDBStep">
+            		<DelayBeforeExecution>0</DelayBeforeExecution> 
+            		<ConnectionString>Persist Security Info=False;Integrated Security=SSPI;database=DBname;server=(local);Connect Timeout=30</ConnectionString>
+            		<DatasetReadXmlSchemaPath>C:\DBDtableSchema.xml</DatasetReadXmlSchemaPath>
+            		<DatasetReadXmlPath>C:\DBDtable.xml</DatasetReadXmlPath> 
+            		<DelayBetweenRecordImports>1</DelayBetweenRecordImports> 
+             </TestStep>
+             </code>
+             
+            	<list type="table">
+            		<listheader>
+            			<term>Tag</term>
+            			<description>Description</description>
+            		</listheader>
+            		<item>
+            			<term>DelayBeforeExecution</term>
+            			<description>The number of seconds to wait before executing the step</description>
+            		</item>
+            		<item>
+            			<term>ConnectionString</term>
+            			<description>The connection string specifying the database to which the DataSet will be imported</description>
+            		</item>
+            		<item>
+            			<term>DatasetReadXmlSchemaPath</term>
+            			<description>File containing the Xml Schema of the table(s) in the DataSet</description>
+            		</item>
+            		<item>
+            			<term>DatasetReadXmlPath</term>
+            			<description>File containing the Xml representation of the data in the DataSet. For datetime columns, you have the option of specifying
+            			getdate() instead of the actual date value. ImportDatasetToDBStep will replace getdate() with the current datetime</description>
+            		</item>
+            		<item>
+            			<term>DelayBetweenRecordImports</term>
+            			<description>The number (in minutes) by which the getdate() specified in a datetime column should differ from the getdate() specified in the 
+            			same datetime column of another record. </description>
+            		</item>
+            	</list>
+             </remarks>
+        </member>
+        <member name="M:BizUnit.ImportDatasetToDBStep.Execute(System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            ITestStep.Execute() implementation
+            </summary>
+            <param name='testConfig'>The Xml fragment containing the configuration for this test step</param>
+            <param name='context'>The context for the test, this holds state that is passed beteen tests</param>
+        </member>
+        <member name="T:BizUnit.RegExContextLoader">
+            <summary>
+            The RegExContextLoader applies a regular expression to the source data and add the value into the context.
+            </summary>
+            
+            <remarks>
+            The following shows an example of the Xml representation of this test step.
+            
+            <code escaped="true">
+            <ContextLoaderStep assemblyPath="" typeName="BizUnit.RegExContextLoader">
+            	<RegEx contextKey="HTTP_Url">/def:html/def:body/def:p[2]/def:form</RegEx>
+            	<RegEx contextKey="ActionID">/def:html/def:body/def:p[2]/def:form/def:input[3]</RegEx>
+            	<RegEx contextKey="ActionType">/def:html/def:body/def:p[2]/def:form/def:input[4]</RegEx>
+            	<RegEx contextKey="HoldEvent">/def:html/def:body/def:p[2]/def:form/def:input[2]</RegEx>
+            </ContextLoaderStep>
+            </code>
+            
+            <list type="table">
+            	<listheader>
+            		<term>Tag</term>
+            		<description>Description</description>
+            	</listheader>
+            	<item>
+            		<term>RegEx</term>
+            		<description>The regular expression to be executed against the input data <para>(repeating)</para></description>
+            	</item>
+            	<item>
+            		<term>RegEx/@contextKey</term>
+            		<description>The name of context key which will be used when addin the new context item <para>(repeating)</para></description>
+            	</item>
+            </list>
+            </remarks>	
+        </member>
+        <member name="M:BizUnit.RegExContextLoader.ExecuteContextLoader(System.IO.Stream,System.Xml.XmlNode,BizUnit.Context)">
+            <summary>
+            IContextLoaderStep.ExecuteContextLoader() implementation
+            </summary>
+            <param name="data">The data which the values are read from.</param>
+            <param name="contextConfig">The configuration for the context loader test step.</param>
+            <param name="context">The context object into which the values will be written.</param>
+        </member>
+    </members>
+</doc>
